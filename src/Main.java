@@ -1,6 +1,5 @@
 import DataStruct.Car;
 import DataStruct.Cross;
-import DataStruct.Graph;
 import DataStruct.Road;
 
 import java.io.*;
@@ -41,6 +40,7 @@ public class Main {
             ArrayList<ArrayList<Road>> res = FindPath.find(crossList, 1,16);
 
             //测试输出结果
+            System.out.println(res.size());
             for(int i = 0; i < res.size(); i++){
                 for(Road road : res.get(i)){
                     System.out.print(road.getId() + " ");
