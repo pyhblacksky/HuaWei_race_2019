@@ -31,10 +31,22 @@ public class Main {
 
             //读取交叉路口
             String pathNameCross = "Z:\\HuaWei_race_2019\\Data\\Cross.txt";
-            ArrayList<String> crossList = new ArrayList<>();
-            ReadFile(pathNameCross, crossList);
+            ArrayList<String> crossStr = new ArrayList<>();
+            ReadFile(pathNameCross, crossStr);
 
-            
+            HashMap<Integer, Road> map = new HashMap<>();
+            ArrayList<Road> roads = StringToRoad(roadList, map);
+
+            ArrayList<Cross> crossList = StringToCross(crossStr,map);
+            ArrayList<ArrayList<Road>> res = FindPath.find(crossList, 1,16);
+
+            //测试输出结果
+            for(int i = 0; i < res.size(); i++){
+                for(Road road : res.get(i)){
+                    System.out.print(road.getId() + " ");
+                }
+                System.out.println();
+            }
 
             //写入结果
             /*
@@ -107,7 +119,7 @@ public class Main {
      *      String 列表转为 Road数据结构
      *      添加路id-road 的  kv结构
      * */
-    public static ArrayList StringToRoad(ArrayList<String> list, HashMap<Integer, Road> map){
+    public static ArrayList<Road> StringToRoad(ArrayList<String> list, HashMap<Integer, Road> map){
         if(list == null) {
             return null;
         }
@@ -134,7 +146,7 @@ public class Main {
      * function : car数据处理
      *      String 列表转为 car数据结构
      * */
-    public static ArrayList StringToCar(ArrayList<String> list){
+    public static ArrayList<Car> StringToCar(ArrayList<String> list){
         if(list == null) {
             return null;
         }

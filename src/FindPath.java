@@ -1,7 +1,5 @@
 import DataStruct.Cross;
-import DataStruct.Graph;
 import DataStruct.Road;
-
 import java.util.*;
 
 /**
@@ -17,7 +15,7 @@ public class FindPath{
     static Set<Integer> set = new HashSet<>();
 
     //从start出发到end，路口顶点集合为cross
-    public static ArrayList find(ArrayList<Cross> crossList, int start, int end){
+    public static ArrayList<ArrayList<Road>> find(ArrayList<Cross> crossList, int start, int end){
         ArrayList<ArrayList<Road>> roads = new ArrayList<>();
         for(Cross cross : crossList){
             //找到起点
@@ -48,31 +46,42 @@ public class FindPath{
         if(cross.getUpRoad() != null){
             list.add(cross.getUpRoad());
             int id = cross.getUpRoad().getEnd();
-            set.add(id);  //走过的路
-            find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
-            set.remove(id);   //回溯
+            if(!set.contains(id)){
+                set.add(id);  //走过的路
+                find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
+                set.remove(id);   //回溯
+            }
+            list.remove(list.size()-1);
         }
         if(cross.getLeftRoad() != null){
             list.add(cross.getLeftRoad());
             int id = cross.getLeftRoad().getEnd();
-
-            set.add(id);  //走过的路
-            find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
-            set.remove(id);   //回溯
+            if(!set.contains(id)) {
+                set.add(id);  //走过的路
+                find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
+                set.remove(id);   //回溯
+            }
+            list.remove(list.size()-1);
         }
         if(cross.getDownRoad() != null){
             list.add(cross.getDownRoad());
             int id = cross.getDownRoad().getEnd();
-            set.add(id);  //走过的路
-            find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
-            set.remove(id);   //回溯
+            if(!set.contains(id)) {
+                set.add(id);  //走过的路
+                find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
+                set.remove(id);   //回溯
+            }
+            list.remove(list.size()-1);
         }
         if(cross.getRightRoad() != null){
             list.add(cross.getRightRoad());
             int id = cross.getRightRoad().getEnd();
-            set.add(id);  //走过的路
-            find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
-            set.remove(id);   //回溯
+            if(!set.contains(id)) {
+                set.add(id);  //走过的路
+                find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
+                set.remove(id);   //回溯
+            }
+            list.remove(list.size()-1);
         }
 
     }
