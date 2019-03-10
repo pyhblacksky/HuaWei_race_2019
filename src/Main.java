@@ -17,54 +17,56 @@ public class Main {
 
     public static void main(String[] args){
         try {
-            /*读取文件*/
+            /*********************************************读取文件********************************************/
             //读取道路
-            String pathNameRoad = "Z:\\HuaWei_race_2019\\Data\\Road.txt";//文件绝对路径
+            String pathNameRoad = "src\\Data\\Road.txt";//文件绝对路径
             ArrayList<String> roadList = new ArrayList<>();
             ReadFile(pathNameRoad, roadList);
 
             //读取车次
-            String pathNameCar = "Z:\\HuaWei_race_2019\\Data\\Car.txt";
+            String pathNameCar = "src\\Data\\Car.txt";
             ArrayList<String> carList = new ArrayList<>();
             ReadFile(pathNameCar, carList);
 
             //读取交叉路口
-            String pathNameCross = "Z:\\HuaWei_race_2019\\Data\\Cross.txt";
+            String pathNameCross = "src\\Data\\Cross.txt";
             ArrayList<String> crossStr = new ArrayList<>();
             ReadFile(pathNameCross, crossStr);
+
+            /***************************************数据读取完毕***************************************/
+
+            long startTime = System.currentTimeMillis();//计算程序运行时间
 
             HashMap<Integer, Road> map = new HashMap<>();
             ArrayList<Road> roads = StringToRoad(roadList, map);
 
             ArrayList<Cross> crossList = StringToCross(crossStr,map);
-            ArrayList<ArrayList<Road>> res = FindPath.find(crossList, 1,16);
+            ArrayList<ArrayList<Road>> res = FindPath.find(crossList, 1,16);//找到路线
+
+            long endTime = System.currentTimeMillis();
+            System.out.println("程序运行时间为 ： " + (endTime - startTime) + "ms");
 
             //测试输出结果
             System.out.println(res.size());
-            for(int i = 0; i < res.size(); i++){
-                for(Road road : res.get(i)){
+            for(ArrayList<Road> list : res){
+                int sum = 0;
+                for(Road road : list){
+                    sum += road.getLength();
                     System.out.print(road.getId() + " ");
                 }
+                System.out.print("该条路的总距离 ： " + sum);
                 System.out.println();
             }
 
             //写入结果
             /*
-            String writePath = "Z:\\HuaWei_race_2019\\Data\\answer.txt";
+            String writePath = "src\\Data\\answer.txt";
             WriteFile(writePath, carList);
             */
 
         }catch (Exception e){
             e.printStackTrace();
         }
-    }
-
-    //打印ArrayList
-    public static void printList(List list){
-        for(int i = 0; i < list.size(); i++){
-            System.out.println(list.get(i));
-        }
-        System.out.println();
     }
 
     /**
@@ -200,20 +202,4 @@ public class Main {
         return res;
     }
 
-    //打印图
-    /*
-    public static void printGraph(Graph graph){
-        for(int i = 0; i < graph.matrix.length; i++){
-            for(int j = 0; j < graph.matrix[i].length; j++){
-                if(graph.matrix[i][j] == null){
-                    System.out.print(0 + " ");
-                    continue;
-                }
-                System.out.print(graph.matrix[i][j].getId() + " ");
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-    */
 }

@@ -11,10 +11,16 @@ import java.util.*;
  */
 public class FindPath{
 
-    //标记set，走过的顶点不能走
+    //标记set，走过的顶点(路口)不能走
     private static Set<Integer> set = new HashSet<>();
 
-    //从start出发到end，路口顶点集合为cross
+    /**
+     * @Function : 寻路函数
+     * @param
+     * crossList 所有路口的集合
+     *           start : 起点
+     *           end ： 终点
+     * */
     public static ArrayList<ArrayList<Road>> find(ArrayList<Cross> crossList, int start, int end){
         ArrayList<ArrayList<Road>> roads = new ArrayList<>();
         for(Cross cross : crossList){
@@ -28,7 +34,16 @@ public class FindPath{
         return roads;
     }
 
-    //迭代寻路
+    /**
+     * @Function: 迭代实现寻路功能
+     * @param
+     *       cross : 路口顶点
+     *       start : 起点
+     *       end : 终点
+     *       list : 存储单条路径的list
+     *       roads : 存储结果集合
+     *       crossList : 顶点集合
+     * */
     private static void find(Cross cross, int start, int end,
                              ArrayList<Road> list, ArrayList<ArrayList<Road>> roads, ArrayList<Cross> crossList){
         if(cross == null){
@@ -57,7 +72,12 @@ public class FindPath{
 
     }
 
-    //根据id获取cross
+    /**
+     * @Function:  根据id获取cross
+     * @param
+     * id : 路口顶点的id
+     *    crossList : 顶点集合
+     * */
     private static Cross getCross(int id, ArrayList<Cross> crossList){
         for(Cross cross : crossList){
             if(cross.getId() == id){
@@ -67,7 +87,15 @@ public class FindPath{
         return null;
     }
 
-    //寻路过程函数
+    /**
+     * @Function: 根据方向寻路的过程函数
+     * @param
+     * direct : 方向（上下左右）
+     *        end : 终点
+     *        list : 存储单条路径的list
+     *        roads : 存储结果集合
+     *        crossList : 顶点集合
+     * */
     private static void process(Road direct, int end, ArrayList<Road> list,
                                 ArrayList<ArrayList<Road>> roads, ArrayList<Cross> crossList){
         if(direct != null && !list.contains(direct)){
