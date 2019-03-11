@@ -11,23 +11,21 @@ import java.util.*;
  */
 public class FindPath{
 
-    //标记set，走过的顶点(路口)不能走
-    private static Set<Integer> set = new HashSet<>();
-
     /**
      * @Function : 寻路函数
      * @param
      * crossList 所有路口的集合
      *           start : 起点
      *           end ： 终点
+     *           set : 标记set，走过的顶点(路口)不能走.寻路一次，set需要开辟新空间
      * */
-    public static ArrayList<ArrayList<Road>> find(ArrayList<Cross> crossList, int start, int end){
+    public static ArrayList<ArrayList<Road>> find(ArrayList<Cross> crossList, int start, int end, HashSet<Integer> set){
         ArrayList<ArrayList<Road>> roads = new ArrayList<>();
         for(Cross cross : crossList){
             //找到起点
             if(cross.getId() == start){
                 set.add(start);
-                find(cross, start, end, new ArrayList<>(), roads, crossList);
+                find(cross, start, end, new ArrayList<>(), roads, crossList, set);
                 break;
             }
         }
@@ -43,9 +41,11 @@ public class FindPath{
      *       list : 存储单条路径的list
      *       roads : 存储结果集合
      *       crossList : 顶点集合
+     *       set : 标记set，走过的顶点(路口)不能走.
      * */
     private static void find(Cross cross, int start, int end,
-                             ArrayList<Road> list, ArrayList<ArrayList<Road>> roads, ArrayList<Cross> crossList){
+                             ArrayList<Road> list, ArrayList<ArrayList<Road>> roads,
+                             ArrayList<Cross> crossList, HashSet<Integer> set){
         if(cross == null){
             return;
         }
@@ -59,16 +59,16 @@ public class FindPath{
 
         //上下左右四个方向
         Road up = cross.getUpRoad();
-        process(up, end, list, roads, crossList);
+        process(up, end, list, roads, crossList, set);
 
         Road left = cross.getLeftRoad();
-        process(left, end, list, roads, crossList);
+        process(left, end, list, roads, crossList, set);
 
         Road down = cross.getDownRoad();
-        process(down, end, list, roads, crossList);
+        process(down, end, list, roads, crossList, set);
 
         Road right = cross.getRightRoad();
-        process(right, end, list, roads, crossList);
+        process(right, end, list, roads, crossList, set);
 
     }
 
@@ -95,9 +95,11 @@ public class FindPath{
      *        list : 存储单条路径的list
      *        roads : 存储结果集合
      *        crossList : 顶点集合
+     *        set : 标记set，走过的顶点(路口)不能走.
      * */
     private static void process(Road direct, int end, ArrayList<Road> list,
-                                ArrayList<ArrayList<Road>> roads, ArrayList<Cross> crossList){
+                                ArrayList<ArrayList<Road>> roads,
+                                ArrayList<Cross> crossList, HashSet<Integer> set){
         if(direct != null && !list.contains(direct)){
             list.add(direct);
             //如果是双向，则有两种走向
@@ -106,14 +108,14 @@ public class FindPath{
                 id = direct.getEnd();
                 if(!set.contains(id)){
                     set.add(id);  //走过的路
-                    find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
+                    find(getCross(id, crossList), id, end, list, roads, crossList, set);  //寻找下一条路
                     set.remove(id);   //回溯
                 }
 
                 id = direct.getStart();
                 if(!set.contains(id)){
                     set.add(id);  //走过的路
-                    find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
+                    find(getCross(id, crossList), id, end, list, roads, crossList, set);  //寻找下一条路
                     set.remove(id);   //回溯
                 }
             } else{
@@ -121,7 +123,7 @@ public class FindPath{
                 id = direct.getEnd();
                 if(!set.contains(id)){
                     set.add(id);  //走过的路
-                    find(getCross(id, crossList), id, end, list, roads, crossList);  //寻找下一条路
+                    find(getCross(id, crossList), id, end, list, roads, crossList, set);  //寻找下一条路
                     set.remove(id);   //回溯
                 }
             }

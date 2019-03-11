@@ -18,36 +18,60 @@ public class Main {
     public static void main(String[] args){
         try {
             /*********************************************读取文件********************************************/
+            String readFile = "src\\Data\\bin\\";
+            String config = "config_1\\";
             //读取道路
-            String pathNameRoad = "src\\Data\\Road.txt";//文件绝对路径
-            ArrayList<String> roadList = new ArrayList<>();
-            ReadFile(pathNameRoad, roadList);
+            String pathNameRoad = readFile + config +"Road.txt";//文件绝对路径
+            ArrayList<String> roadStr = new ArrayList<>();
+            ReadFile(pathNameRoad, roadStr);
 
             //读取车次
-            String pathNameCar = "src\\Data\\Car.txt";
-            ArrayList<String> carList = new ArrayList<>();
-            ReadFile(pathNameCar, carList);
+            String pathNameCar = readFile + config + "Car.txt";
+            ArrayList<String> carStr = new ArrayList<>();
+            ReadFile(pathNameCar, carStr);
 
             //读取交叉路口
-            String pathNameCross = "src\\Data\\Cross.txt";
+            String pathNameCross = readFile + config + "Cross.txt";
             ArrayList<String> crossStr = new ArrayList<>();
             ReadFile(pathNameCross, crossStr);
 
             /***************************************数据读取完毕***************************************/
 
+            ArrayList<Car> carList = StringToCar(carStr);
+
+            for(Car car : carList){
+                long startTime = System.currentTimeMillis();//计算程序运行时间
+
+                HashMap<Integer, Road> map = new HashMap<>();
+                ArrayList<Road> roads = StringToRoad(roadStr, map);
+
+                ArrayList<Cross> crossList = StringToCross(crossStr,map);
+                ArrayList<ArrayList<Road>> res = FindPath.find(crossList, car.getStart(),car.getEnd(), new HashSet<>());//找到路线
+
+                long endTime = System.currentTimeMillis();
+                System.out.print("car_id_"+ car.getId() + "程序运行时间为 ： " + (endTime - startTime) + "ms   ");
+
+                //测试输出结果
+                System.out.println("car_id_"+ car.getId() + " 路径的总数 ：" + res.size());
+            }
+
+            /*
             long startTime = System.currentTimeMillis();//计算程序运行时间
 
             HashMap<Integer, Road> map = new HashMap<>();
-            ArrayList<Road> roads = StringToRoad(roadList, map);
+            ArrayList<Road> roads = StringToRoad(roadStr, map);
 
             ArrayList<Cross> crossList = StringToCross(crossStr,map);
-            ArrayList<ArrayList<Road>> res = FindPath.find(crossList, 1,16);//找到路线
+            ArrayList<ArrayList<Road>> res = FindPath.find(crossList, 20, 2);//找到路线
 
             long endTime = System.currentTimeMillis();
-            System.out.println("程序运行时间为 ： " + (endTime - startTime) + "ms");
+            System.out.print("程序运行时间为 ： " + (endTime - startTime) + "ms   ");
 
             //测试输出结果
-            System.out.println(res.size());
+            System.out.println(" 路径的总数 ：" + res.size());
+            */
+
+            /*
             for(ArrayList<Road> list : res){
                 int sum = 0;
                 for(Road road : list){
@@ -56,7 +80,7 @@ public class Main {
                 }
                 System.out.print("该条路的总距离 ： " + sum);
                 System.out.println();
-            }
+            }*/
 
             //写入结果
             /*
@@ -84,6 +108,10 @@ public class Main {
             while(line != null){
                 //去除空行
                 if(line.trim().equals("")){
+                    line = br.readLine();
+                    continue;
+                }
+                if(line.charAt(0) == '#'){//#为注释行，忽略
                     line = br.readLine();
                     continue;
                 }
