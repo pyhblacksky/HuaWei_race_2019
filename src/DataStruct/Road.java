@@ -18,6 +18,10 @@ public class Road {
     private int end;    //终点id
     private int directed;   //是否双向，1表示双向，0表示单向
 
+    //根据车道数和路长度建立路的行车结构 横坐标表示车道，纵坐标表示长度的具体位置
+    //实际上是一个矩阵,标号从1开始, 每个节点为一辆车，无车则为空
+    private Car[][] matrix; //路的具体结构
+
     public Road(int id, int length, int MaxSpeed, int lanes, int start, int end, int directed) {
         this.id = id;
         this.length = length;
@@ -26,6 +30,7 @@ public class Road {
         this.start = start;
         this.end = end;
         this.directed = directed;
+        matrix = new Car[lanes+1][length+1];
     }
 
     //只有道路编号，起点终点id的路结构
@@ -92,11 +97,14 @@ public class Road {
         this.directed = directed;
     }
 
-    //打印路的路径
-    public static void printRoad(List<Road> list){
-        for(int i = 0; i < list.size(); i++){
-            System.out.print(list.get(i).getId() + " ");
-        }
-        System.out.println();
+    //获取该路的状态
+    public Car[][] getRoadStatue() {
+        return matrix;
     }
+
+    //更新路的状态
+    public void setRoadStatue(Car car, int lanes, int length) {
+        this.matrix[lanes][length] = car;
+    }
+
 }

@@ -1,3 +1,4 @@
+import DataStruct.Car;
 import DataStruct.Cross;
 import DataStruct.Road;
 import java.util.*;
@@ -12,7 +13,41 @@ import java.util.*;
 public class FindPath{
 
     /**
-     * @Function : 寻路函数
+     * @Function : 寻路函数——根据车辆
+     * @param
+     * crossList 所有路口的集合
+     *           car : 当前行驶的车辆
+     *           set : 标记set，走过的顶点(路口)不能走.寻路一次，set需要开辟新空间
+     * */
+    public static ArrayList<ArrayList<Road>> find(ArrayList<Cross> crossList, Car car, HashSet<Integer> set){
+        ArrayList<ArrayList<Road>> roads = new ArrayList<>();
+        for(Cross cross : crossList){
+            //找到起点
+            if(cross.getId() == car.getStart()){
+                set.add(car.getStart());
+                find(cross, car.getStart(), car.getEnd(), new ArrayList<>(), roads, crossList, set);
+                break;
+            }
+        }
+        return roads;
+    }
+
+    //计算行驶时间，单段路
+    public static int countTime(Car car, Road road){
+        int v = Math.min(car.getMaxSpeed(), road.getMaxSpeed());
+        //单段路计算，不考虑过路口的情况
+        int time = road.getLength() / v;
+        return time;
+    }
+
+    /****************************************************有时间权的寻路**********************************************/
+    //TODO : write code here
+
+
+    /****************************************************寻找所有路径***********************************************/
+
+    /**
+     * @Function : 寻路函数——根据起点和终点
      * @param
      * crossList 所有路口的集合
      *           start : 起点
@@ -72,20 +107,6 @@ public class FindPath{
 
     }
 
-    /**
-     * @Function:  根据id获取cross
-     * @param
-     * id : 路口顶点的id
-     *    crossList : 顶点集合
-     * */
-    private static Cross getCross(int id, ArrayList<Cross> crossList){
-        for(Cross cross : crossList){
-            if(cross.getId() == id){
-                return cross;
-            }
-        }
-        return null;
-    }
 
     /**
      * @Function: 根据方向寻路的过程函数
@@ -130,5 +151,20 @@ public class FindPath{
 
             list.remove(list.size()-1);
         }
+    }
+
+    /**
+     * @Function:  根据id获取cross
+     * @param
+     * id : 路口顶点的id
+     *    crossList : 顶点集合
+     * */
+    private static Cross getCross(int id, ArrayList<Cross> crossList){
+        for(Cross cross : crossList){
+            if(cross.getId() == id){
+                return cross;
+            }
+        }
+        return null;
     }
 }

@@ -46,7 +46,8 @@ public class Main {
                 ArrayList<Road> roads = StringToRoad(roadStr, map);
 
                 ArrayList<Cross> crossList = StringToCross(crossStr,map);
-                ArrayList<ArrayList<Road>> res = FindPath.find(crossList, car.getStart(),car.getEnd(), new HashSet<>());//找到路线
+
+                ArrayList<ArrayList<Road>> res = FindPath.find(crossList, car, new HashSet<>());//找到路线
 
                 long endTime = System.currentTimeMillis();
                 System.out.print("car_id_"+ car.getId() + "程序运行时间为 ： " + (endTime - startTime) + "ms   ");
