@@ -22,6 +22,10 @@ public class Road {
     //实际上是一个矩阵,标号从1开始, 每个节点为一辆车，无车则为空
     private Car[][] matrix; //路的具体结构
 
+    //该车道的权值
+    private int weight = INF;
+    private static final int INF = Integer.MAX_VALUE;//默认最大值,无通路
+
     public Road(int id, int length, int MaxSpeed, int lanes, int start, int end, int directed) {
         this.id = id;
         this.length = length;
@@ -31,6 +35,7 @@ public class Road {
         this.end = end;
         this.directed = directed;
         matrix = new Car[lanes+1][length+1];
+        this.weight = length / MaxSpeed;
     }
 
     //只有道路编号，起点终点id的路结构
@@ -95,6 +100,14 @@ public class Road {
 
     public void setDirected(int directed) {
         this.directed = directed;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 
     //获取该路的状态
