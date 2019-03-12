@@ -26,19 +26,13 @@ public class RegularSpeed {
         if(nowRoadDistance >= nowSpeed){
             //剩余距离大于车速，继续保持这条道路行驶
             //TODO : write code here
+
         }
 
         //如果S1 >= V2 则不能通行，行至路口处
         if(nowRoadDistance >= nextSpeed){
-            //有前车，则跟车
-
-            //否则行到路口处
+            //nowRoad.setRoadStatue(car, )
             return 0;
-        }
-
-        //有前车
-        if(hasFrontCar(nextRoad, car)){
-            //TODO : write code here
         }
 
         //如果可行驶距离范围内没有前车,按照规则行驶，否则跟车，
@@ -54,9 +48,4 @@ public class RegularSpeed {
         return Math.min(road.getMaxSpeed(), car.getMaxSpeed());
     }
 
-    //判断有无前车函数,通过道路来判断
-    public static boolean hasFrontCar(Road road, Car car){
-
-        return false;
-    }
 }

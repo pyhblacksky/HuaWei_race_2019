@@ -102,9 +102,63 @@ public class Road {
         return matrix;
     }
 
-    //更新路的状态
-    public void setRoadStatue(Car car, int lanes, int length) {
-        this.matrix[lanes][length] = car;
+    //确定该路的某个位置是否有车
+    public boolean hasCar(int lanes, int length){
+        return this.matrix[lanes][length] != null;
     }
+
+    //根据车获取在当前路的坐标
+    public int[] getCarPosition(Car car){
+        int[] res = new int[]{-1, -1};//返回的默认值，如果返回这个值，说明车在该路不存在
+        for(int i = 1; i < this.matrix.length; i++){
+            for(int j = 1; j < this.matrix[i].length; j++){
+                if(this.matrix[i][j] == car){
+                    return new int[]{i, j};
+                }
+            }
+        }
+        return res;
+    }
+
+    //更新路的状态
+    //将车放入矩阵，需要进行判断
+    /**
+     * car : 要更新的车
+     * lanes : 要更新的车要去的车道，
+     * length : 在该条路上，最大可行驶的距离
+     * */
+    public boolean setRoadStatue(Car car, int lanes, int length) {
+        //先获取当前车所处位置
+        int[] position = getCarPosition(car);
+
+        //length ： 当前车的最长可行驶距离
+        //遍历所有车道，从要更新的序号小的车道开始
+        for(int i = lanes; i < this.matrix.length; i++) {
+            //判断当前车道是否存在前车
+            int j = 1;
+            for (j = 1; j <= length; j++) {
+                if (hasCar(i, j)) {
+                    break;
+                }
+            }
+            if (j >= length) {//说明在这段路上没有前车,直接更新
+                this.matrix[i][length] = car;
+                //将原有位置清空
+                this.matrix[position[0]][position[1]] = null;
+                return true;
+            }
+            if(j == 1){//说明该车道占满了，不能更新，需要切换车道
+                continue;
+            }
+            //此时受到前车限制，但是该车道还有空位，将本车更新在前车后,更新！
+            this.matrix[i][j-1] = car;
+            //将原有位置清空
+            this.matrix[position[0]][position[1]] = null;
+            return true;
+        }
+        return false;//更新失败,必须等待
+    }
+
+    //出道路为第一排，即矩阵的尾部，此处考虑双向车道的情况？？
 
 }
