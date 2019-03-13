@@ -1,9 +1,11 @@
 package Astar;
 
+import DataStruct.Car;
 import DataStruct.Cross;
 import DataStruct.Road;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -11,19 +13,65 @@ import java.util.List;
  * @Date: 2019/3/11 19:46
  * @Version 1.0
  * @Function:
- *      A*实现寻路
+ *      A*实现寻路，适应于本题交通的情况
  *
  */
 public class AFind {
 
     ArrayList<Cross> crossList;
+    Car car;
 
-    public AFind(ArrayList<Cross> crossList){
+    //需要建立矩阵
+    int[][] matrix;
+    private final static int INF = -1;
+
+    /**
+     * 构造函数，传入crossList和car的信息，car用于更新路的权重
+     * */
+    public AFind(ArrayList<Cross> crossList, Car car){
         this.crossList = crossList;
+        this.car = car;
+        //矩阵初始化
+        matrix = new int[crossList.size()+1][crossList.size()+1];
+        for(int i = 0; i < matrix.length; i++){
+            for(int j = 0; j < matrix[i].length; j++){
+                matrix[i][j] = INF;
+                if(i == j){matrix[i][j] = 0;}
+            }
+        }
+        //赋值
+        for(Cross cross : crossList){
+            if(cross.getUpRoad() != null){
+                updateMatrix(matrix, cross.getUpRoad(), cross);
+            }
+            if(cross.getDownRoad() != null){
+                updateMatrix(matrix, cross.getDownRoad(), cross);
+            }
+            if(cross.getLeftRoad() != null){
+                updateMatrix(matrix, cross.getLeftRoad(), cross);
+            }
+            if(cross.getRightRoad() != null){
+                updateMatrix(matrix, cross.getRightRoad(), cross);
+            }
+        }
+    }
+    /**
+     * 根据 road 和 cross来更新矩阵值
+     * */
+    private void updateMatrix(int[][] matrix, Road road, Cross cross){
+        Cross next = getCross(road.getEnd(), crossList);
+        if(next == cross){
+            return;
+        }
+        int weight = road.getWeight();
+        matrix[cross.getId()][next.getId()] = weight;
+        //双向路
+        if(road.getDirected() == 1){
+            matrix[next.getId()][cross.getId()] = weight;
+        }
     }
 
-    //步长，用于计算，走一步的实际代价
-    public static final int STEP = 1;
+    private static final int STEP = 1;//步长，用于计算，走一步的实际代价
 
     private ArrayList<Node> openList = new ArrayList<>();   //开放列表
     private ArrayList<Node> closeList = new ArrayList<>();  //封闭列表
@@ -49,54 +97,57 @@ public class AFind {
         ArrayList<Node> arrayList = new ArrayList<>();
 
         // 只考虑上下左右，不考虑斜对角  与道路行规则一致
-        //上
-        Road up = currentNode.cross.getUpRoad();
-        process(up, arrayList);
+        Cross cross = currentNode.cross;
+        if(cross != null) {
+            for(int i = 1; i < matrix.length; i++) {
+                //&& !exists(closeList, cross)  此条件省略？,若不省略则无法完成寻路
+                if (matrix[cross.getId()][i] != -1 && matrix[cross.getId()][i] != 0) {
+                    //判断具有相同道路, 利用hash添加公共路
+                    HashSet<Road> roads = new HashSet<>();
+                    roads.add(cross.getUpRoad());
+                    roads.add(cross.getDownRoad());
+                    roads.add(cross.getLeftRoad());
+                    roads.add(cross.getRightRoad());
 
-        //下
-        Road down = currentNode.cross.getDownRoad();
-        process(down, arrayList);
+                    Road road = null;
+                    Cross next = getCross(i, crossList);
+                    for(Road r : roads){
+                        if(r != null) {
+                            if (r == next.getUpRoad()) {
+                                road = r;
+                                break;
+                            }
+                            if (r == next.getLeftRoad()) {
+                                road = r;
+                                break;
+                            }
+                            if (r == next.getDownRoad()) {
+                                road = r;
+                                break;
+                            }
+                            if (r == next.getRightRoad()) {
+                                road = r;
+                                break;
+                            }
+                        }
+                    }
 
-        //左
-        Road left = currentNode.cross.getLeftRoad();
-        process(left, arrayList);
-
-        //右
-        Road right = currentNode.cross.getLeftRoad();
-        process(right, arrayList);
-
-        return arrayList;
-    }
-    //过程函数
-    private void process(Road road, ArrayList<Node> arrayList){
-        if(road != null) {
-            //考虑道路是否双向
-            if (road.getDirected() == 1) {
-                Cross cross = getCross(road.getEnd(), crossList);
-                //可以到达且在关闭表中不存在
-                if (canReach(cross) && !exists(closeList, cross)) {
-                    arrayList.add(new Node(cross, road));
-                }
-
-                cross = getCross(road.getStart(), crossList);
-                if (canReach(cross) && !exists(closeList, cross)) {
-                    arrayList.add(new Node(cross, road));
-                }
-            } else {
-                Cross cross = getCross(road.getEnd(), crossList);
-                //可以到达且在关闭表中不存在
-                if (canReach(cross) && !exists(closeList, cross)) {
-                    arrayList.add(new Node(cross, road));
+                    //添加进邻居
+                    arrayList.add(new Node(next, road, car));
                 }
             }
         }
+
+        return arrayList;
     }
 
     /**
-     * 是否可以到达
+     * 是否可以到达，暂时没用
      * */
-    public boolean canReach(Cross cross) {
-        return cross != null;
+    public boolean canReach(Road road) {
+        int i = road.getStart();
+        int j = road.getEnd();
+        return matrix[i][j] != -1 && matrix[i][j] != 0;
     }
 
     /**
@@ -109,6 +160,18 @@ public class AFind {
         openList.add(startNode);
 
         while (openList.size() > 0) {
+            /*
+            //打印矩阵
+            System.out.println("第"+count+"次矩阵：");
+            count++;
+            for(int i = 0; i < matrix.length; i++){
+                for(int j = 0; j < matrix[i].length; j++){
+                    System.out.print(matrix[i][j] + " ");
+                }
+                System.out.println();
+            }
+            System.out.println();
+            */
             // 遍历 open list ，查找 F值最小的节点，把它作为当前要处理的节点
             Node currentNode = findMinFNodeInOpenList();
             // 从open list中移除
@@ -121,8 +184,8 @@ public class AFind {
                 //node 在 open 表中，更新值
                 if (exists(openList, node)) {
                     foundPoint(currentNode, node);
-                } else {
-                    //没有在表中，计算值并添加进开放表
+                } else{
+                    //没有在表中，计算值并添加进开放表？？ 怎么更新
                     notFoundPoint(currentNode, endNode, node);
                 }
             }
@@ -168,23 +231,12 @@ public class AFind {
     }
 
     /**
-     * 计算H??????
+     * 计算H, 此处采用逼近的思想，预估值为两个序号点只之差，比如从1->36 . 会通过可行路，逐步逼近36
      * */
     private int calcH(Node end, Node node) {
         int step = 1;
-        if(end.cross.getUpRoad() != null && node.cross.getUpRoad() != null){
-            step += Math.abs(end.cross.getUpRoad().getWeight() - node.cross.getUpRoad().getWeight());
-        }
-        if(end.cross.getDownRoad() != null && node.cross.getDownRoad() != null){
-            step += Math.abs(end.cross.getDownRoad().getWeight() - node.cross.getDownRoad().getWeight());
-        }
-        if(end.cross.getLeftRoad() != null && node.cross.getLeftRoad() != null){
-            step += Math.abs(end.cross.getLeftRoad().getWeight() - node.cross.getLeftRoad().getWeight());
-        }
-        if(end.cross.getRightRoad() != null && node.cross.getRightRoad() != null){
-            step += Math.abs(end.cross.getRightRoad().getWeight() - node.cross.getRightRoad().getWeight());
-        }
-
+        //根据序号之差来更新
+        step += Math.abs(end.cross.getId() - node.cross.getId());
         return step * STEP;
     }
 
@@ -197,7 +249,7 @@ public class AFind {
         return null;
     }
 
-    //由坐标判断是否存在于表中
+    //由cross判断是否存在于表中
     public static boolean exists(List<Node> nodes, Cross cross) {
         for (Node n : nodes) {
             if (n.cross == cross) {
@@ -219,9 +271,10 @@ public class AFind {
      *  以cross为顶点的Node
      * */
     public static class Node {
-        public Node(Cross cross, Road road) {
+        public Node(Cross cross, Road road, Car car) {
             this.cross = cross;
             this.road = road;
+            this.road.setWeight(road.getLength() / Math.min(car.getMaxSpeed(), road.getMaxSpeed()));
         }
         public Node(Cross cross){
             this.cross = cross;
