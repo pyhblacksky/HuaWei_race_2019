@@ -13,8 +13,8 @@ import java.util.HashSet;
  * @Author: pyh
  * @Date: 2019/3/8 9:27
  * @Version 1.0
- * @Function:   实现文件读取txt和写入txt
- *
+ * @Function:
+ *      测试A*可行性
  *
  */
 public class Main {
@@ -42,7 +42,7 @@ public class Main {
             /***************************************数据读取完毕***************************************/
 
             ArrayList<Car> carList = IOProcess.StringToCar(carStr);
-
+            HashMap<Integer ,ArrayList<Road>> outPut = new HashMap<>();
             long sumTimeStart = System.currentTimeMillis();
             int count = 0;//计算没有寻到路的数量
             for(Car car : carList){
@@ -74,6 +74,10 @@ public class Main {
                     newHead = newHead.parent;
                 }
                 if(res.size() == 0){count++;}
+                //count++;
+                outPut.put(car.getId(), res);
+
+                //显示数据
                 System.out.print("car_id_"+ car.getId() + " 起点："+ car.getStart() + " 终点: " + car.getEnd() + "  所寻道路为：");
                 for(Road road : res){
                     System.out.print(road.getId() + " ");
@@ -81,17 +85,16 @@ public class Main {
 
                 long endTime = System.currentTimeMillis();
                 System.out.println("  程序运行时间为 ： " + (endTime - startTime) + "ms   ");
+
             }
             System.out.println("没有寻到路的数量为 ： " + count);
             long sumTimeEnd = System.currentTimeMillis();
             System.out.println("车的数量为"+carList.size()+ "时寻路花费的总时间为 ： " + (sumTimeEnd - sumTimeStart)+"ms");
 
-
-            //写入结果
-            /*
-            String writePath = "src\\Data\\answer.txt";
-            IOProcess.WriteFile(writePath, carList);
-            */
+            //写入结果  发车时间未定????
+            String writePath = readFile + config + "answer.txt";
+            int time = 1;
+            IOProcess.WriteFile(writePath, outPut, time);
 
         }catch (Exception e){
             e.printStackTrace();

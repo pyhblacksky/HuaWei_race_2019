@@ -51,15 +51,27 @@ public class IOProcess {
     /**
      * function : 写出文件
      * var : path : 写出文件存储的路径
-     *      list : 要写入内容的列表
+     *      map : carId  和 其对应路的map表
+     *      time : 发车时间
      * */
-    public static void WriteFile(String path, ArrayList<String> list){
+    public static void WriteFile(String path, HashMap<Integer, ArrayList<Road>> map, int time){
         try {
             File writeName = new File(path);
             writeName.createNewFile();//创建新文件
             BufferedWriter out = new BufferedWriter(new FileWriter(writeName));
-            for(String str : list){
+            int count = 1;
+            for(Integer i : map.keySet()){
+                String temp = "";
+                for(Road road : map.get(i)){
+                    temp += road.getId()+",";
+                }
+                temp = temp.substring(0, temp.length()-1);//去除最后一个逗号
+                String str = "("+i+", "+time+", "+temp+")";
                 out.write(str+"\r\n");//    \r\n即为换行
+                if(count % 3 == 0){
+                    time++;//发车时间
+                }
+                count++;
             }
             out.flush();//把缓存区内容压入文件
             out.close();//关闭文件

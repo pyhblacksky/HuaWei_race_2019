@@ -7,6 +7,7 @@ import DataStruct.Road;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @Author: pyh
@@ -100,8 +101,8 @@ public class AFind {
         Cross cross = currentNode.cross;
         if(cross != null) {
             for(int i = 1; i < matrix.length; i++) {
-                //&& !exists(closeList, cross)  此条件省略？,若不省略则无法完成寻路
-                if (matrix[cross.getId()][i] != -1 && matrix[cross.getId()][i] != 0) {
+                Cross next = getCross(i, crossList);    //下一个要到达的路口
+                if (matrix[cross.getId()][i] != -1 && matrix[cross.getId()][i] != 0 && !exists(closeList, next)) {
                     //判断具有相同道路, 利用hash添加公共路
                     HashSet<Road> roads = new HashSet<>();
                     roads.add(cross.getUpRoad());
@@ -110,7 +111,6 @@ public class AFind {
                     roads.add(cross.getRightRoad());
 
                     Road road = null;
-                    Cross next = getCross(i, crossList);
                     for(Road r : roads){
                         if(r != null) {
                             if (r == next.getUpRoad()) {
@@ -236,7 +236,8 @@ public class AFind {
     private int calcH(Node end, Node node) {
         int step = 1;
         //根据序号之差来更新
-        step += Math.abs(end.cross.getId() - node.cross.getId());
+        Random random = new Random();//随机数
+        step += Math.abs(end.cross.getId() - node.cross.getId()) + random.nextInt(10);
         return step * STEP;
     }
 
