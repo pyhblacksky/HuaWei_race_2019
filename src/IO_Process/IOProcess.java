@@ -50,26 +50,30 @@ public class IOProcess {
 
     /**
      * function : 写出文件
-     * var : path : 写出文件存储的路径
-     *      map : carId  和 其对应路的map表
-     *      time : 发车时间
+     * var :
+     *      carList : 车的链表，当前链表中的车保存了对应走的路的信息
      * */
-    public static void WriteFile(String path, HashMap<Integer, ArrayList<Road>> map, int time){
+    public static void WriteFile(String path, ArrayList<Car> carList){
         try {
             File writeName = new File(path);
             writeName.createNewFile();//创建新文件
             BufferedWriter out = new BufferedWriter(new FileWriter(writeName));
             int count = 1;
-            for(Integer i : map.keySet()){
-                String temp = "";
-                for(Road road : map.get(i)){
-                    temp += road.getId()+",";
+            int time = 1;
+            for(Car car : carList){
+                String roadStr = "";
+                for(Road road : car.getRoads()){
+                    roadStr += road.getId()+",";
                 }
-                temp = temp.substring(0, temp.length()-1);//去除最后一个逗号
-                String str = "("+i+", "+time+", "+temp+")";
+                if(time < car.getTime()){//如果准备发车时间大于计划发车时间，则以计划发车时间为准
+                    time = car.getTime();
+                }
+                roadStr = roadStr.substring(0, roadStr.length()-1);//去除最后一个逗号
+                String str = "("+car.getId()+", "+time+", "+roadStr+")";
+
                 out.write(str+"\r\n");//    \r\n即为换行
-                if(count % 3 == 0){
-                    time++;//发车时间
+                if(count % 5 == 0){//每5辆车,模数更改则为几辆车发
+                    time += car.getWeight();//发车时间, 车的权重是预估走完的时间
                 }
                 count++;
             }

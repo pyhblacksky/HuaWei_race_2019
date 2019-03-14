@@ -19,6 +19,75 @@ import java.util.Random;
  */
 public class AFind {
 
+    /**
+     * 获取寻路信息
+     * crossList: 节点的列表
+     * car : 寻路车辆
+     * 最后保存的路径信息在car.roads里面
+     * */
+    public static void AFindPath(ArrayList<Cross> crossList, Car car){
+        AFind find = new AFind(crossList, car);
+        AFind.Node node = find.findPath(new AFind.Node(AFind.getCross(car.getStart(), crossList)),
+                new AFind.Node(AFind.getCross(car.getEnd(), crossList)));
+
+        ArrayList<Road> res = new ArrayList<>();
+        //反转链表，因为结果集是反的
+        AFind.Node newHead = null;
+        while(node != null){
+            AFind.Node temp = node.parent;
+            node.parent = newHead;
+            newHead = node;
+            node = temp;
+        }
+        //添加结果集
+        int weight = 0;
+        while(newHead != null){
+            if(newHead.road != null){
+                res.add(newHead.road);
+                weight += newHead.road.getWeight();
+            }
+            newHead = newHead.parent;
+        }
+        car.setWeight(weight);//设置当前车的权重
+        car.setRoads(res);//更新当前车所走的通路
+    }
+    /**
+     * roadList ： 该列表里的路禁止通行
+     * */
+    public static void AFindPath(ArrayList<Cross> crossList, Car car, ArrayList<Road> roadList){
+        AFind find = new AFind(crossList, car);
+        if(roadList != null && roadList.size() != 0){
+            for(Road road : roadList){
+                find.forbidRoad(road);
+            }
+        }
+
+        AFind.Node node = find.findPath(new AFind.Node(AFind.getCross(car.getStart(), crossList)),
+                new AFind.Node(AFind.getCross(car.getEnd(), crossList)));
+
+        ArrayList<Road> res = new ArrayList<>();
+        //反转链表，因为结果集是反的
+        AFind.Node newHead = null;
+        while(node != null){
+            AFind.Node temp = node.parent;
+            node.parent = newHead;
+            newHead = node;
+            node = temp;
+        }
+        //添加结果集
+        int weight = 0;
+        while(newHead != null){
+            if(newHead.road != null){
+                res.add(newHead.road);
+                weight += newHead.road.getWeight();
+            }
+            newHead = newHead.parent;
+        }
+        car.setWeight(weight);//设置当前车的权重
+        car.setRoads(res);//更新当前车所走的通路
+    }
+
+    /**************************************************************************************************************/
     ArrayList<Cross> crossList;
     Car car;
 
@@ -71,8 +140,21 @@ public class AFind {
             matrix[next.getId()][cross.getId()] = weight;
         }
     }
+    /**
+     * 根据 路 封闭矩阵某点的方法
+     * */
+    public void forbidRoad(Road road){
+        int i = road.getStart();
+        int j = road.getEnd();
+        if(road.getDirected() == 1){
+            matrix[i][j] = -1;
+            matrix[j][i] = -1;
+        } else{
+            matrix[i][j] = -1;
+        }
+    }
 
-    private static final int STEP = 1;//步长，用于计算，走一步的实际代价
+    private static final int STEP = 10;//步长，用于计算，走一步的实际代价
 
     private ArrayList<Node> openList = new ArrayList<>();   //开放列表
     private ArrayList<Node> closeList = new ArrayList<>();  //封闭列表
@@ -102,7 +184,7 @@ public class AFind {
         if(cross != null) {
             for(int i = 1; i < matrix.length; i++) {
                 Cross next = getCross(i, crossList);    //下一个要到达的路口
-                if (matrix[cross.getId()][i] != -1 && matrix[cross.getId()][i] != 0 && !exists(closeList, next)) {
+                if (canReach(cross, i) && !exists(closeList, next)) {
                     //判断具有相同道路, 利用hash添加公共路
                     HashSet<Road> roads = new HashSet<>();
                     roads.add(cross.getUpRoad());
@@ -112,7 +194,7 @@ public class AFind {
 
                     Road road = null;
                     for(Road r : roads){
-                        if(r != null) {
+                        if(r != null && next != null) {
                             if (r == next.getUpRoad()) {
                                 road = r;
                                 break;
@@ -132,8 +214,14 @@ public class AFind {
                         }
                     }
 
-                    //添加进邻居
-                    arrayList.add(new Node(next, road, car));
+                    if(road != null){
+                        //此处更新权值，但是怎么更新?
+                        if(currentNode.road != null){
+                            matrix[cross.getId()][i] = currentNode.road.getWeight();
+                        }
+                        //添加进邻居
+                        arrayList.add(new Node(next, road, car));
+                    }
                 }
             }
         }
@@ -142,12 +230,12 @@ public class AFind {
     }
 
     /**
-     * 是否可以到达，暂时没用
+     * 是否可以到达
+     * cross : 起点路口
+     * i ： 下一个要到达的路口id
      * */
-    public boolean canReach(Road road) {
-        int i = road.getStart();
-        int j = road.getEnd();
-        return matrix[i][j] != -1 && matrix[i][j] != 0;
+    public boolean canReach(Cross cross, int i) {
+        return matrix[cross.getId()][i] != -1 && matrix[cross.getId()][i] != 0;
     }
 
     /**
@@ -237,8 +325,19 @@ public class AFind {
         int step = 1;
         //根据序号之差来更新
         Random random = new Random();//随机数
-        step += Math.abs(end.cross.getId() - node.cross.getId()) + random.nextInt(10);
-        return step * STEP;
+        //step += Math.abs(end.cross.getId() - node.cross.getId());
+        /*
+        if(end.road != null && node.road != null){
+            step += Math.abs(end.road.getWeight() - node.road.getWeight());
+        }
+        */
+
+        //以当前road权值来选择，可能是局部最优解不是全局最优解
+        if(node.road != null){
+            step += node.road.getWeight();
+        }
+
+        return step * 4;// 4 是权重，自调节，不同值下得到的路的总权重不同
     }
 
     //寻找目标点是否在范围内
@@ -281,8 +380,8 @@ public class AFind {
             this.cross = cross;
         }
 
-        Cross cross;
-        Road road;
+        public Cross cross;
+        public Road road;
 
         public int F;
         public int G;
