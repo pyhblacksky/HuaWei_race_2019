@@ -8,11 +8,13 @@ package DataStruct;
  */
 public class Car {
 
-    private int id;
-    private int start;
-    private int end;
-    private int MaxSpeed;
-    private int time;
+    private int id;     //车辆id
+    private int start;  //起点
+    private int end;    //终点
+    private int MaxSpeed;//最大速度
+    private int time;   //出发时间
+
+    private CarState carState;    //当前车辆行驶状态
 
     public Car(int id, int start, int end, int maxSpeed, int time) {
         this.id = id;
@@ -20,6 +22,16 @@ public class Car {
         this.end = end;
         MaxSpeed = maxSpeed;
         this.time = time;
+
+    }
+
+    public Car(int id, int start, int end, int maxSpeed, int time, CarState carState) {
+        this.id = id;
+        this.start = start;
+        this.end = end;
+        MaxSpeed = maxSpeed;
+        this.time = time;
+        this.carState = carState;
     }
 
     public int getId() {
@@ -60,5 +72,13 @@ public class Car {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public CarState getCarState() {
+        return carState;
+    }
+
+    public void setCarState(CarState carState) {
+        this.carState = carState;
     }
 }
