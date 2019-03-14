@@ -1,5 +1,7 @@
 package DataStruct;
 
+import java.util.ArrayList;
+
 /**
  * @Author: pyh
  * @Date: 2019/3/8 21:05
@@ -15,6 +17,9 @@ public class Car {
     private int time;   //出发时间
 
     private CarState carState;    //当前车辆行驶状态
+    private int weight;     //当前车辆所走的权重,表示走当前这条路所花费的时间
+
+    private ArrayList<Road> roads;//保存该车走过的路
 
     public Car(int id, int start, int end, int maxSpeed, int time) {
         this.id = id;
@@ -22,7 +27,7 @@ public class Car {
         this.end = end;
         MaxSpeed = maxSpeed;
         this.time = time;
-
+        this.weight = 0;
     }
 
     public Car(int id, int start, int end, int maxSpeed, int time, CarState carState) {
@@ -80,5 +85,21 @@ public class Car {
 
     public void setCarState(CarState carState) {
         this.carState = carState;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
+    public ArrayList<Road> getRoads() {
+        return roads;
+    }
+
+    public void setRoads(ArrayList<Road> roads) {
+        this.roads = new ArrayList<>(roads);
     }
 }
