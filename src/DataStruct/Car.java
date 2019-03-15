@@ -21,6 +21,8 @@ public class Car {
 
     private ArrayList<Road> roads;//保存该车走过的路
 
+    private int realTime;//实际出发时间
+
     public Car(int id, int start, int end, int maxSpeed, int time) {
         this.id = id;
         this.start = start;
@@ -28,6 +30,7 @@ public class Car {
         MaxSpeed = maxSpeed;
         this.time = time;
         this.weight = 0;
+        this.realTime = 0;
     }
 
     public Car(int id, int start, int end, int maxSpeed, int time, CarState carState) {
@@ -37,6 +40,7 @@ public class Car {
         MaxSpeed = maxSpeed;
         this.time = time;
         this.carState = carState;
+        this.realTime = 0;
     }
 
     public int getId() {
@@ -101,5 +105,18 @@ public class Car {
 
     public void setRoads(ArrayList<Road> roads) {
         this.roads = new ArrayList<>(roads);
+    }
+
+    public int getRealTime() {
+        return realTime;
+    }
+
+    public void setRealTime(int realTime) {
+        //如果实际出发时间比预计出发时间小，则以预计出发时间为准
+        if(realTime < this.time){
+            this.realTime = this.time;
+            return;
+        }
+        this.realTime = realTime;
     }
 }

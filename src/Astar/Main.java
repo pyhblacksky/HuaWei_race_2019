@@ -22,7 +22,7 @@ public class Main {
         try {
             /*********************************************读取文件********************************************/
             String readFile = "src\\Data\\bin\\";
-            String config = "config_10\\";
+            String config = "config_11\\";
             //读取道路
             String pathNameRoad = readFile + config +"Road.txt";//文件绝对路径
             ArrayList<String> roadStr = new ArrayList<>();
@@ -65,10 +65,9 @@ public class Main {
             }
             //TODO:预测发车死锁，出现就回溯，重新寻路
             //假设car10739的5017号路不能走
-            ArrayList<Road> forbidRoadList = new ArrayList<>();
-            forbidRoadList.add(getRoadFromId(5017, roads));
-            AFind.AFindPath(crossList, getCarFromId(10739, carList), forbidRoadList);
-
+            //ArrayList<Road> forbidRoadList = new ArrayList<>();
+            //forbidRoadList.add(getRoadFromId(5017, roads));
+            //AFind.AFindPath(crossList, getCarFromId(10739, carList), forbidRoadList);
 
             //对carList进行排序，按照car的权值进行排序
             Collections.sort(carList, new Comparator<Car>() {

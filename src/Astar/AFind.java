@@ -50,9 +50,11 @@ public class AFind {
         }
         car.setWeight(weight);//设置当前车的权重
         car.setRoads(res);//更新当前车所走的通路
+        car.setRealTime(weight/2);//更新出发时间
     }
     /**
-     * roadList ： 该列表里的路禁止通行
+     * 重载函数
+     * roadList ： 该列表里的路禁止通行，更新可行矩阵
      * */
     public static void AFindPath(ArrayList<Cross> crossList, Car car, ArrayList<Road> roadList){
         AFind find = new AFind(crossList, car);
@@ -86,7 +88,38 @@ public class AFind {
         car.setWeight(weight);//设置当前车的权重
         car.setRoads(res);//更新当前车所走的通路
     }
+    /**
+     * 重载函数
+     * 起点到终点的寻路，即根据ID
+     * startId：起点
+     * endId：终点
+     * */
+    public static void AFindPath(ArrayList<Cross> crossList, Car car, int startId, int endId){
+        AFind find = new AFind(crossList, car);
+        AFind.Node node = find.findPath(new AFind.Node(getCross(startId, crossList)),
+                new AFind.Node(getCross(endId, crossList)));
 
+        ArrayList<Road> res = new ArrayList<>();
+        //反转链表，因为结果集是反的
+        AFind.Node newHead = null;
+        while(node != null){
+            AFind.Node temp = node.parent;
+            node.parent = newHead;
+            newHead = node;
+            node = temp;
+        }
+        //添加结果集
+        int weight = 0;
+        while(newHead != null){
+            if(newHead.road != null){
+                res.add(newHead.road);
+                weight += newHead.road.getWeight();
+            }
+            newHead = newHead.parent;
+        }
+        car.setWeight(weight);//设置当前车的权重
+        car.setRoads(res);//更新当前车所走的通路
+    }
     /**************************************************************************************************************/
     ArrayList<Cross> crossList;
     Car car;
@@ -378,6 +411,12 @@ public class AFind {
         }
         public Node(Cross cross){
             this.cross = cross;
+        }
+        public Node(Cross cross, ArrayList<Road> roads, Car car){
+            this.cross = cross;
+            for(Road road : roads){
+                road.setWeight(road.getLength() / Math.min(car.getMaxSpeed(), road.getMaxSpeed()));
+            }
         }
 
         public Cross cross;
