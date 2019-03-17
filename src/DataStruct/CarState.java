@@ -18,4 +18,27 @@ public class CarState {
         this.position = position;
     }
 
+    public int getRoadId() {
+        return roadId;
+    }
+
+    public void setRoadId(int roadId) {
+        this.roadId = roadId;
+    }
+
+    public int getLane() {
+        return lane;
+    }
+
+    public void setLane(int lane) {
+        this.lane = lane;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
 }

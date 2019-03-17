@@ -20,6 +20,7 @@ public class Car {
     private int weight;     //当前车辆所走的权重,表示走当前这条路所花费的时间
 
     private ArrayList<Road> roads;//保存该车走过的路
+    private ArrayList<Road> forbidRoads;//保存该车禁止走的路
 
     private int realTime;//实际出发时间
 
@@ -31,6 +32,7 @@ public class Car {
         this.time = time;
         this.weight = 0;
         this.realTime = 0;
+        this.forbidRoads = new ArrayList<>();
     }
 
     public Car(int id, int start, int end, int maxSpeed, int time, CarState carState) {
@@ -119,4 +121,16 @@ public class Car {
         }
         this.realTime = realTime;
     }
+
+    public ArrayList<Road> getForbidRoads() {
+        return forbidRoads;
+    }
+
+    public void setForbidRoads(ArrayList<Road> forbidRoads) {
+        this.forbidRoads = new ArrayList<>(forbidRoads);
+    }
+    public void addForbidRoads(Road road){
+        this.forbidRoads.add(road);
+    }
+
 }

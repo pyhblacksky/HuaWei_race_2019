@@ -23,6 +23,15 @@ public class Cross {
         this.rightRoad = rightRoad;
         this.downRoad = downRoad;
         this.leftRoad = leftRoad;
+        this.Control_priority = -1;
+    }
+    public Cross(int id, Road upRoad, Road rightRoad, Road downRoad, Road leftRoad, int Control_priority) {
+        this.id = id;
+        this.upRoad = upRoad;
+        this.rightRoad = rightRoad;
+        this.downRoad = downRoad;
+        this.leftRoad = leftRoad;
+        this.Control_priority = Control_priority;
     }
 
     //get 和 set方法
@@ -64,5 +73,19 @@ public class Cross {
 
     public void setLeftRoad(Road leftRoad) {
         this.leftRoad = leftRoad;
+    }
+
+    /**
+     * 根据C++新增
+     * */
+    private int Control_priority;
+
+    public int getControl_priority() {
+
+        return Control_priority;
+    }
+
+    public void setControl_priority(int Control_priority) {
+        this.Control_priority = Control_priority;
     }
 }
