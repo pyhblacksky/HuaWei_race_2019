@@ -27,6 +27,12 @@ public class AFind {
      * */
     public static void AFindPath(ArrayList<Cross> crossList, Car car){
         AFind find = new AFind(crossList, car);
+        //如果车的禁止列表不为空
+        if(car.getForbidRoads() != null && car.getForbidRoads().size() != 0){
+            for(Road road : car.getForbidRoads()){
+                find.forbidRoad(road);
+            }
+        }
         AFind.Node node = find.findPath(new AFind.Node(AFind.getCross(car.getStart(), crossList)),
                 new AFind.Node(AFind.getCross(car.getEnd(), crossList)));
 
@@ -56,12 +62,46 @@ public class AFind {
      * 重载函数
      * roadList ： 该列表里的路禁止通行，更新可行矩阵
      * */
-    public static void AFindPath(ArrayList<Cross> crossList, Car car, ArrayList<Road> roadList){
+    public static void AFindPath(ArrayList<Cross> crossList, Car car, ArrayList<Road> forbidRoadList){
         AFind find = new AFind(crossList, car);
-        if(roadList != null && roadList.size() != 0){
-            for(Road road : roadList){
+        if(forbidRoadList != null && forbidRoadList.size() != 0){
+            for(Road road : forbidRoadList){
                 find.forbidRoad(road);
             }
+        }
+
+        AFind.Node node = find.findPath(new AFind.Node(AFind.getCross(car.getStart(), crossList)),
+                new AFind.Node(AFind.getCross(car.getEnd(), crossList)));
+
+        ArrayList<Road> res = new ArrayList<>();
+        //反转链表，因为结果集是反的
+        AFind.Node newHead = null;
+        while(node != null){
+            AFind.Node temp = node.parent;
+            node.parent = newHead;
+            newHead = node;
+            node = temp;
+        }
+        //添加结果集
+        int weight = 0;
+        while(newHead != null){
+            if(newHead.road != null){
+                res.add(newHead.road);
+                weight += newHead.road.getWeight();
+            }
+            newHead = newHead.parent;
+        }
+        car.setWeight(weight);//设置当前车的权重
+        car.setRoads(res);//更新当前车所走的通路
+    }
+    /**
+     * 重载函数
+     * 单条路禁止
+     * */
+    public static void AFindPath(ArrayList<Cross> crossList, Car car, Road forbidRoad){
+        AFind find = new AFind(crossList, car);
+        if(forbidRoad != null){
+            find.forbidRoad(forbidRoad);
         }
 
         AFind.Node node = find.findPath(new AFind.Node(AFind.getCross(car.getStart(), crossList)),
@@ -176,7 +216,7 @@ public class AFind {
     /**
      * 根据 路 封闭矩阵某点的方法
      * */
-    public void forbidRoad(Road road){
+    private void forbidRoad(Road road){
         int i = road.getStart();
         int j = road.getEnd();
         if(road.getDirected() == 1){
@@ -195,7 +235,7 @@ public class AFind {
     /**
      * 找到开放列表中 估值函数F 最小的节点, 可以考虑使用堆，直接弹出
      * */
-    public Node findMinFNodeInOpenList() {
+    private Node findMinFNodeInOpenList() {
         Node tempNode = openList.get(0);
         for (Node node : openList) {
             if (node.F < tempNode.F) {
@@ -209,7 +249,7 @@ public class AFind {
      * 找到该节点的相邻节点
      * @return 返回相邻节点的表
      * */
-    public ArrayList<Node> findNeighborNodes(Node currentNode) {
+    private ArrayList<Node> findNeighborNodes(Node currentNode) {
         ArrayList<Node> arrayList = new ArrayList<>();
 
         // 只考虑上下左右，不考虑斜对角  与道路行规则一致
@@ -267,7 +307,7 @@ public class AFind {
      * cross : 起点路口
      * i ： 下一个要到达的路口id
      * */
-    public boolean canReach(Cross cross, int i) {
+    private boolean canReach(Cross cross, int i) {
         return matrix[cross.getId()][i] != -1 && matrix[cross.getId()][i] != 0;
     }
 
@@ -275,7 +315,7 @@ public class AFind {
      * 此为主要功能函数
      * 寻路：起点到终点
      * */
-    public Node findPath(Node startNode, Node endNode) {
+    private Node findPath(Node startNode, Node endNode) {
 
         // 把起点加入 open list
         openList.add(startNode);
@@ -383,7 +423,7 @@ public class AFind {
     }
 
     //由cross判断是否存在于表中
-    public static boolean exists(List<Node> nodes, Cross cross) {
+    private static boolean exists(List<Node> nodes, Cross cross) {
         for (Node n : nodes) {
             if (n.cross == cross) {
                 return true;
@@ -442,7 +482,7 @@ public class AFind {
      * id : 路口顶点的id
      *    crossList : 顶点集合
      * */
-    public static Cross getCross(int id, ArrayList<Cross> crossList){
+    private static Cross getCross(int id, ArrayList<Cross> crossList){
         for(Cross cross : crossList){
             if(cross.getId() == id){
                 return cross;
