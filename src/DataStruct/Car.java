@@ -33,6 +33,7 @@ public class Car {
         this.weight = 0;
         this.realTime = 0;
         this.forbidRoads = new ArrayList<>();
+        this.carState = new CarState();//设置车辆默认状态
     }
 
     public Car(int id, int start, int end, int maxSpeed, int time, CarState carState) {

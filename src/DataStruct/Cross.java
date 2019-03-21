@@ -77,11 +77,11 @@ public class Cross {
 
     /**
      * 根据C++新增
+     * 获取路口的控制权最高的车辆的ID
      * */
     private int Control_priority;
 
     public int getControl_priority() {
-
         return Control_priority;
     }
 

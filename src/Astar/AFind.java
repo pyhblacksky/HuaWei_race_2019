@@ -182,7 +182,7 @@ public class AFind {
                 if(i == j){matrix[i][j] = 0;}
             }
         }
-        //赋值
+        //赋值     && cross.getUpRoad().getId()
         for(Cross cross : crossList){
             if(cross.getUpRoad() != null){
                 updateMatrix(matrix, cross.getUpRoad(), cross);
@@ -203,7 +203,7 @@ public class AFind {
      * */
     private void updateMatrix(int[][] matrix, Road road, Cross cross){
         Cross next = getCross(road.getEnd(), crossList);
-        if(next == cross){
+        if(next == cross || next == null){
             return;
         }
         int weight = road.getWeight();

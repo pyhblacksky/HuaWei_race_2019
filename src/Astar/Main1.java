@@ -85,7 +85,7 @@ public class Main1 {
 
             //写入结果
             String writePath = readFile + config + "answer.txt";
-            IOProcess.WriteFile(writePath, carList);
+            //IOProcess.WriteFile(writePath, carList);
 
         }catch (Exception e){
             e.printStackTrace();

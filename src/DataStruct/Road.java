@@ -24,6 +24,9 @@ public class Road {
     private static final int INF = Integer.MAX_VALUE;//默认最大值,无通路
 
     public Road(int id, int length, int MaxSpeed, int lanes, int start, int end, int directed) {
+        if(id == -1){//序号为-1，设置为空路
+            return;
+        }
         this.id = id;
         this.length = length;
         this.MaxSpeed = MaxSpeed;
@@ -37,18 +40,20 @@ public class Road {
          * 根据C++新增
          * */
         //初始化
+        this.matrix_E2S = new ArrayList<>(lanes);//初始化
+        this.matrix_S2E = new ArrayList<>(lanes);
+        //空车占位用id为-1的表示
         Car car = new Car(-1, -1, -1, -1, -1);//此值设为空
         ArrayList<Car> lanes_car = new ArrayList<>();
-        this.matrix_E2S = new ArrayList<>();//初始化
-        this.matrix_E2S = new ArrayList<>();
         for (int i = 0; i < length; i++) {
             lanes_car.add(car);
         }
         for (int j = 0; j < lanes; j++) {
-            this.matrix_S2E.add(lanes_car);
+            matrix_S2E.add(lanes_car);
         }
+
         for (int j = 0; j < lanes; j++) {
-            this.matrix_E2S.add(lanes_car);
+            matrix_E2S.add(lanes_car);
         }
     }
 
@@ -183,20 +188,20 @@ public class Road {
         return loc;
     }
 
-    //public void setMatrix_S2E(Car car, int i, int j) {
-    //    this.matrix_S2E.get(i).get(j) = car;
-    //}
+    public void setMatrix_S2E(Car car, int i, int j) {
+        this.matrix_S2E.get(i).set(j, car);
+    }
 
     public ArrayList<ArrayList<Car>> getMatrix_S2E() {
         return matrix_S2E;
     }
-    //void setMatrix_E2S(Car car, int i, int j) {
-    //    this.matrix_E2S.get(i).get(j) = car;
-    //}
 
-    public ArrayList<ArrayList<Car>>getMatrix_E2S() {
+    public void setMatrix_E2S(Car car, int i, int j) {
+        this.matrix_E2S.get(i).set(j, car);
+    }
+
+    public ArrayList<ArrayList<Car>> getMatrix_E2S() {
         return matrix_S2E;
-
     }
 }
 

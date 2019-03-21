@@ -1,5 +1,6 @@
 package IO_Process;
 
+import DataStruct.Answer;
 import DataStruct.Car;
 import DataStruct.Cross;
 import DataStruct.Road;
@@ -54,6 +55,7 @@ public class IOProcess {
      * var :
      *      carList : 车的链表，当前链表中的车保存了对应走的路的信息
      * */
+    /*
     public static void WriteFile(String path, ArrayList<Car> carList){
         try {
             File writeName = new File(path);
@@ -69,6 +71,29 @@ public class IOProcess {
             e.printStackTrace();
         }
     }
+    */
+
+    /**
+     * function : 写出文件
+     * var :
+     *      carList : 车的链表，当前链表中的车保存了对应走的路的信息
+     * */
+    public static void WriteFile(String path, ArrayList<Answer> answerList){
+        try {
+            File writeName = new File(path);
+            writeName.createNewFile();//创建新文件
+            BufferedWriter out = new BufferedWriter(new FileWriter(writeName));
+            ArrayList<String> strList = AnswerToString(answerList);
+            for(String str : strList){
+                out.write(str+"\r\n");//    \r\n即为换行
+            }
+            out.flush();//把缓存区内容压入文件
+            out.close();//关闭文件
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     /**
      * function: 转换
      * 将carList转为String
@@ -225,6 +250,27 @@ public class IOProcess {
         return res;
     }
 
+    /**
+     * function：转换
+     * 将AnswerList转为String
+     * */
+    private static ArrayList<String> AnswerToString(ArrayList<Answer> answerList){
+        if(answerList == null || answerList.size() == 0){
+            return null;
+        }
+        ArrayList<String> res = new ArrayList<>(answerList.size());
+        for(int i = 0; i < answerList.size(); i++){
+            Answer answer = answerList.get(i);
+            String roadStr = "";
+            for(Road road : answer.getRoads()){
+                roadStr += road.getId()+",";
+            }
+            roadStr = roadStr.substring(0, roadStr.length()-1);//去除最后一个逗号
+            String str = "("+answer.getCarId()+", "+answer.getTime()+", "+roadStr+")";
+            res.add(str);//添加入ArrayList
+        }
+        return res;
+    }
 
     /**
      * function : road数据处理
@@ -293,10 +339,10 @@ public class IOProcess {
             str = str.substring(1, str.length()-1);
             String[] strArr = str.split(",");//以逗号为分隔符
             int id = Integer.valueOf(strArr[0].trim());
-            Road upRoad = null;
-            Road leftRoad = null;
-            Road downRoad = null;
-            Road rightRoad = null;
+            Road upRoad = new Road(-1,-1,-1,-1,-1,-1,-1);//初始化路位id为-1的路
+            Road leftRoad = new Road(-1,-1,-1,-1,-1,-1,-1);
+            Road downRoad = new Road(-1,-1,-1,-1,-1,-1,-1);
+            Road rightRoad = new Road(-1,-1,-1,-1,-1,-1,-1);
             //如果为1，则为空路
             if(Integer.valueOf(strArr[1].trim()) != -1)
                 upRoad = map.get(Integer.valueOf(strArr[1].trim()));
@@ -317,11 +363,4 @@ public class IOProcess {
      * path:写出路径
      * carList: car的信息
      * */
-    public static void WriteTempState(String path, ArrayList<Car> carList){
-        try {
-
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 }
