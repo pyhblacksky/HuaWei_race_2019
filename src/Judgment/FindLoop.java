@@ -29,7 +29,7 @@ public class FindLoop {
      * 保存形成环的路
      * @return Set 保存形成的路
      * */
-    public static Set findLoop(ArrayList<Cross> crosses, ArrayList<Road> roads){
+    public static Set<List<Integer>> findLoop(ArrayList<Cross> crosses, ArrayList<Road> roads){
         crossList = new ArrayList<>(crosses);
         roadList = new ArrayList<>(roads);
         allCirclesRoads = new HashSet<>();
