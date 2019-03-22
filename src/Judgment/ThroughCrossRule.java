@@ -83,7 +83,7 @@ public class ThroughCrossRule {
         }
         if(k >= path.size()-1){
             //k大于当前可行驶道路，说明到达终点，返回-1表示结束
-            return -1;
+            return -2;
         }
         Road NextRoad = path.get(k+1);//下一条要行驶的道路   k+1
         if(NextRoad == null){
@@ -163,7 +163,7 @@ public class ThroughCrossRule {
         int[] num0 = { 3,0,1,2 }; //右面，前一个标号
         int[] num1 = { 1,2,3,0 }; //左面，下一个标号
         int[] num2 = { 2,3,0,1 }; //对面， 对面标号
-        ArrayList<ArrayList<Car>>  Matrix_temp = new ArrayList<>();
+        ArrayList<ArrayList<Car>>  Matrix_temp;
         ArrayList<Road> Roads = new ArrayList<>();
         Road_regular(Roads, cross);  //四条道路顺时针形成道路向量
         Control_priority = cross.getControl_priority();
@@ -172,14 +172,21 @@ public class ThroughCrossRule {
             if (road.getDirected() == 1){//为双向路
                 Matrix_temp = road.getMatrix_E2S();
                 Topcar_loc = road.get_Topcar_location_E2S(lane+1);
+            }  else{ //被忽略的情况
+                Matrix_temp = null;
+                Topcar_loc = -2;
             }
         } else {
 
             Matrix_temp = road.getMatrix_S2E();
-            Topcar_loc = road.get_Topcar_location_S2E(lane+1);
+            if(Matrix_temp == null){
+                Topcar_loc = -2;
+            } else
+                Topcar_loc = road.get_Topcar_location_S2E(lane+1);
         }
 
         if (Topcar_loc == -1) return -1;  //-1表示本车道为空车道
+        if (Topcar_loc == -2) return -2;//未考虑的情况
 
         Car car = Matrix_temp.get(lane).get(Topcar_loc);
 
@@ -220,9 +227,15 @@ public class ThroughCrossRule {
             if (Max_dis_allow >= Car_Nextroad_V)   return 0;
             else                                   return (Car_Nextroad_V - Max_dis_allow);
 
-        } else
-            return -2;//异常情况
+        } else if(Direction_me == -2){
+            int Car_Thisroad_V = Math.min(car.getMaxSpeed(),road.getMaxSpeed());
+            Max_dis_allow = road.getLength() - 1 - Topcar_loc;
 
+            if (Max_dis_allow >= Car_Thisroad_V)   return 0;
+            else                                   return  -2; //直接到终点
+        }
+        System.out.println("Pass_or_Not 返回值为-2   异常情况");
+        return -2;//异常情况
     }
 
     /**
@@ -427,7 +440,11 @@ public class ThroughCrossRule {
         //int pass_or_not = Pass_or_Not(cross, lane, AllRoads, AllCross);
 
         /********************start0**************************************/
-        if (pass_or_not == -1 || pass_or_not == -2) return -1;  //本车道为空车道 或 异常
+        if (pass_or_not == -1) return -1;  //本车道为空车道 或 异常
+        else if(pass_or_not == -2)
+        {
+            return -2;
+        }
         else {
             /******************************start1**************************************/
             // 寻找我车所在道路在向量中的定位,获得这条路的矩阵
@@ -507,7 +524,7 @@ public class ThroughCrossRule {
                         if (Lastcar_Nextroad_loc == -1) {
                             Topcar.getCarState().setLane(lane_temp-1) ;
                             CarState carstate_temp=Topcar.getCarState();
-                            carstate_temp.setPosition(Math.min(Next_road.getLength(), pass_or_not-1));
+                            carstate_temp.setPosition(Math.min(Next_road.getLength()-1, pass_or_not-1));
                             Topcar.setCarState(carstate_temp);
 
 
@@ -518,7 +535,7 @@ public class ThroughCrossRule {
                         } else {
                             Topcar.getCarState().setLane(lane_temp-1);
                             CarState carstate_temp=Topcar.getCarState();
-                            carstate_temp.setPosition(Math.min(Lastcar_Nextroad_loc, pass_or_not-1));
+                            carstate_temp.setPosition(Math.min(Lastcar_Nextroad_loc, pass_or_not)-1);
                             Topcar.setCarState(carstate_temp);
                             return (Math.min(Lastcar_Nextroad_loc, pass_or_not));
                         }
@@ -543,7 +560,7 @@ public class ThroughCrossRule {
                         if (Lastcar_Nextroad_loc == -1) {
                             Topcar.getCarState().setLane(lane_temp-1);
                             CarState carstate_temp=Topcar.getCarState();
-                            carstate_temp.setPosition(Math.min(Next_road.getLength(), pass_or_not-1));
+                            carstate_temp.setPosition(Math.min(Next_road.getLength(), pass_or_not)-1);
                             Topcar.setCarState(carstate_temp);
                             return (Math.min(Next_road.getLength(), pass_or_not));
                         } else if (Lastcar_Nextroad_loc == 0) {
@@ -552,7 +569,7 @@ public class ThroughCrossRule {
                         } else {
                             Topcar.getCarState().setLane(lane_temp-1);
                             CarState carstate_temp=Topcar.getCarState();
-                            carstate_temp.setPosition(Math.min(Lastcar_Nextroad_loc, pass_or_not-1));
+                            carstate_temp.setPosition(Math.min(Lastcar_Nextroad_loc, pass_or_not)-1);
                             Topcar.setCarState(carstate_temp);
                             return (Math.min(Lastcar_Nextroad_loc, pass_or_not));
                         }
@@ -574,7 +591,7 @@ public class ThroughCrossRule {
 
                         if (Lastcar_Nextroad_loc == -1) {
                             CarState carstate_temp=Topcar.getCarState();
-                            carstate_temp.setPosition(Math.min(Next_road.getLength(), pass_or_not-1));
+                            carstate_temp.setPosition(Math.min(Next_road.getLength(), pass_or_not)-1);
                             Topcar.setCarState(carstate_temp);
                             Topcar.getCarState().setLane(lane_temp-1);
                             return (Math.min(Next_road.getLength(), pass_or_not));
@@ -584,7 +601,7 @@ public class ThroughCrossRule {
                         } else {
                             Topcar.getCarState().setLane(lane_temp-1);
                             CarState carstate_temp=Topcar.getCarState();
-                            carstate_temp.setPosition(Math.min(Lastcar_Nextroad_loc, pass_or_not-1));
+                            carstate_temp.setPosition(Math.min(Lastcar_Nextroad_loc, pass_or_not)-1);
                             Topcar.setCarState(carstate_temp);
                             return (Math.min(Lastcar_Nextroad_loc, pass_or_not));
                         }
@@ -595,6 +612,7 @@ public class ThroughCrossRule {
         }
         /********************end0**************************************/
 
+        System.out.println("GO_distance 返回值为0   异常情况");
         return 0;//？？？？？
     }
 
@@ -603,19 +621,21 @@ public class ThroughCrossRule {
      * 前面的Cross,本车车道lane，本道路Thisroad,本车Untopcar
      * */
     public static int Untopcar_Go_distance(Cross cross, int lane,Road Thisroad, Car Untopcar) {
-        ArrayList<ArrayList<Car>>  Matrix_Thisroad = new ArrayList<>();
+        ArrayList<ArrayList<Car>>  Matrix_Thisroad;
         int front_car_loc=-1;
 
         if (Thisroad.getStart() == cross.getId()) {
             if (Thisroad.getDirected() == 1) {
                 Matrix_Thisroad = Thisroad.getMatrix_E2S();
+            } else{
+                return -2;//忽略掉的情况
             }
         } else {
             Matrix_Thisroad = Thisroad.getMatrix_S2E();
         }
 
         for (int j = Untopcar.getCarState().getPosition()+1; j < Thisroad.getLength(); j++) {
-            if ((Matrix_Thisroad.get(lane+1).get(j)).getId() != -1) {
+            if ((Matrix_Thisroad.get(lane).get(j)).getId() != -1) {
                 front_car_loc = j;
                 break;
             }

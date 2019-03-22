@@ -1,5 +1,6 @@
 package DataStruct;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,8 @@ import java.util.List;
  * @Version 1.0
  * @Function:   路数据结构
  */
-public class Road {
+public class Road implements Serializable {
+    //private static final long serialVersionUID = 10L;//序列化
 
     private int id; //道路id
     private int length; //道路长度
@@ -43,17 +45,22 @@ public class Road {
         this.matrix_E2S = new ArrayList<>(lanes);//初始化
         this.matrix_S2E = new ArrayList<>(lanes);
         //空车占位用id为-1的表示
-        Car car = new Car(-1, -1, -1, -1, -1);//此值设为空
-        ArrayList<Car> lanes_car = new ArrayList<>();
-        for (int i = 0; i < length; i++) {
-            lanes_car.add(car);
-        }
-        for (int j = 0; j < lanes; j++) {
-            matrix_S2E.add(lanes_car);
+        for (int i = 0; i < lanes; i++) {
+            ArrayList<Car> emptyCarList = new ArrayList<>();
+            for (int j = 0; j < length; j++) {
+                Car emptyCar = new Car(-1, -1, -1, -1, -1);//此值设为空
+                emptyCarList.add(emptyCar);
+            }
+            matrix_S2E.add(emptyCarList);
         }
 
-        for (int j = 0; j < lanes; j++) {
-            matrix_E2S.add(lanes_car);
+        for (int i = 0; i < lanes; i++) {
+            ArrayList<Car> emptyCarList = new ArrayList<>();
+            for (int j = 0; j < length; j++) {
+                Car emptyCar = new Car(-1, -1, -1, -1, -1);//此值设为空
+                emptyCarList.add(emptyCar);
+            }
+            matrix_E2S.add(emptyCarList);
         }
     }
 
@@ -152,14 +159,28 @@ public class Road {
         }
         return loc;
     }
+    //获取正常的车，没有runing的车
+    public int get_Normalcar_location_S2E(int lane) {
+        int loc = -1;     //-1默认值，认为是空车道
+        ArrayList<ArrayList<Car>> Matrix_temp = new ArrayList<>(this.matrix_S2E);
+        for(int i = this.length - 1; i >= 0; i--){
+            if (Matrix_temp.get(lane-1).get(i).getId() != -1 && Matrix_temp.get(lane-1).get(i).getCarState().isRunning()) {
+                loc = i;
+                break;
+            }
+        }
+        return loc;
+    }
 
     //获取尾部车辆    从左到右
     public int get_Lastcar_location_S2E(int lane) {
         int loc = -1;
         ArrayList<ArrayList<Car>> Matrix_temp = new ArrayList<ArrayList<Car>>(this.matrix_S2E);
         for (int i = 0; i <= this.length - 1; i++) {
-            if (Matrix_temp.get(lane-1).get(i).getId() != -1)
+            if (Matrix_temp.get(lane-1).get(i).getId() != -1) {
                 loc = i;
+                break;
+            }
         }
         return loc;
     }
@@ -176,14 +197,28 @@ public class Road {
         }
         return loc;
     }
+    //获取正常的车，没有runing的车
+    public int get_Normalcar_location_E2S(int lane){
+        int loc = -1;     //-1默认值，认为是空车道
+        ArrayList<ArrayList<Car>> Matrix_temp = new ArrayList<>(this.matrix_E2S);
+        for (int i = this.length - 1; i >= 0; i--){
+            if (Matrix_temp.get(lane-1).get(i).getId() != -1 && Matrix_temp.get(lane-1).get(i).getCarState().isRunning()) {
+                loc = i;
+                break;
+            }
+        }
+        return loc;
+    }
 
     //获取尾车，从右到左
     public int get_Lastcar_location_E2S(int lane) {
         int loc = -1;
         ArrayList<ArrayList<Car>> Matrix_temp = new ArrayList<>(this.matrix_E2S);
         for (int i = 0; i <= this.length - 1; i++){
-            if (Matrix_temp.get(lane-1).get(i).getId() != -1)
+            if (Matrix_temp.get(lane-1).get(i).getId() != -1) {
                 loc = i;
+                break;
+            }
         }
         return loc;
     }
@@ -201,7 +236,7 @@ public class Road {
     }
 
     public ArrayList<ArrayList<Car>> getMatrix_E2S() {
-        return matrix_S2E;
+        return matrix_E2S;
     }
 }
 

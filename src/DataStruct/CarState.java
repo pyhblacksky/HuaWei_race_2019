@@ -1,12 +1,15 @@
 package DataStruct;
 
+import java.io.Serializable;
+
 /**
  * @Author: pyh
  * @Date: 2019/3/14 8:37
  * @Version 1.0
  * @Function:   车在当前道路上行驶的状态
  */
-public class CarState {
+public class CarState implements Serializable {
+    private static final long serialVersionUID = 10L;//序列化
 
     public int roadId;     //当前车辆行驶的道路id
     public int lane;       //在当前道路上行驶的车道

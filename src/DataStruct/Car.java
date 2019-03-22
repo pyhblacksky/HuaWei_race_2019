@@ -1,5 +1,6 @@
 package DataStruct;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -8,7 +9,8 @@ import java.util.ArrayList;
  * @Version 1.0
  * @Function:   车辆的数据结构
  */
-public class Car {
+public class Car implements Serializable {
+    //private static final long serialVersionUID = 10L;//序列化
 
     private int id;     //车辆id
     private int start;  //起点

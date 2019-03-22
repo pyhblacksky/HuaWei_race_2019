@@ -30,7 +30,7 @@ public class Judge {
      * @return time 返回调度时间
      * */
     public static int judge(ArrayList<Car> cars, ArrayList<Cross> crosses,
-                              ArrayList<Road> roads, ArrayList<Answer> answers){
+                            ArrayList<Road> roads, ArrayList<Answer> answers){
         /**************************数据预处理***************************/
         roadList = new ArrayList<>(roads);
         carList = new ArrayList<>(cars);
@@ -50,13 +50,13 @@ public class Judge {
         int Time = 1;//从时间1开始
         boolean deadLock = false;//标记是否出现死锁
         int count = 0;//计算已满道路数
-        for(; !isGarageEmpty();Time++) {
+        for(; ;Time++) {
             /*****测试——当前在路上的车****/
             ArrayList<Car> inRoadCar = getInRoadCar();
-            System.out.println(inRoadCar);
+            //System.out.println(inRoadCar);
             /*****测试——到达终点的车****/
             ArrayList<Car> endCar = getInEndCar();
-            System.out.println(endCar);
+            //System.out.println(endCar);
             /*****************************/
 
             /*当所有在路上的车辆运行完成*/
@@ -67,15 +67,15 @@ public class Judge {
                     break;
                 }
 
-                ArrayList<Road> fullRoad = countFullRoad();//计算已满路
-                if(fullRoad.size() >= 3){//count>=3 是形成环的必要条件，此时判断这三条路是否成环
-                    if(conflict(fullRoad)){//出现死锁
-                        //将其中一条满的路封闭。破坏成环条件
-                        destroyLoop(inRoadCar, fullRoad.get(0));//传入当前在路上的车辆，寻找包括这条路的,将这条路加入禁止
-                        deadLock = true;
-                        break;
-                    }
-                }
+                //ArrayList<Road> fullRoad = countFullRoad();//计算已满路
+                //if(fullRoad.size() >= 4){//count>=3 是形成环的必要条件，此时判断这三条路是否成环
+                //    if(conflict(fullRoad)){//出现死锁
+                //        //将其中一条满的路封闭。破坏成环条件
+                //        destroyLoop(inRoadCar, fullRoad.get(0));//传入当前在路上的车辆，寻找包括这条路的,将这条路加入禁止
+                //        deadLock = true;
+                //        break;
+                //    }
+                //}
 
                 driveAllCarJustOnRoadToEndState();
             }
@@ -187,7 +187,7 @@ public class Judge {
                                         changeRoad = true;
                                         break;
                                     }
-                                   continue;
+                                    continue;
                                 }
                                 Car topCar = road.getMatrix_S2E().get(lane).get(position);//获取车
                                 if(topCar == null || topCar.getId() == -1){//不存在头车，说明此时车道为空
@@ -223,12 +223,20 @@ public class Judge {
                                         updateRoad(topCar, road, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), 1);
                                         topCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
                                     } else {//过路口
+                                        if(real_distance == 0){
+                                            //被堵住，在原地
+                                            topCar.getCarState().setRunning(false);
+                                            continue;
+                                        }
+                                        if(real_distance == -2){
+                                            //到终点
+                                            topCar.getCarState().setEnd(true);
+                                            deleteRoadCar(topCar, road, 1);
+                                            continue;
+                                        }
+
                                         deleteRoadCar(topCar, road, 1);//删除这条路上的该车
                                         Road nextRoad = getNextRoad(topCar);
-                                        if(nextRoad == null){//说明到达终点
-                                            topCar.getCarState().setEnd(true);
-                                            continue;//下一车道
-                                        }
                                         topCar.getCarState().setRoadId(nextRoad.getId());//更新车的下一条路的状态
                                         updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), 1);//放入的方向是否正确？
                                         topCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
@@ -303,12 +311,20 @@ public class Judge {
                                         updateRoad(topCar, road, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), -1);
                                         topCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
                                     } else {//过路口
+                                        if(real_distance == 0){
+                                            //被堵住，在原地
+                                            topCar.getCarState().setRunning(false);
+                                            continue;
+                                        }
+                                        if(real_distance == -2){
+                                            //到终点
+                                            topCar.getCarState().setEnd(true);
+                                            deleteRoadCar(topCar, road, -1);
+                                            continue;
+                                        }
+
                                         deleteRoadCar(topCar, road, -1);//删除这条路上的该车
                                         Road nextRoad = getNextRoad(topCar);
-                                        if(nextRoad == null){//说明到达终点
-                                            topCar.getCarState().setEnd(true);
-                                            continue;//下一车道
-                                        }
                                         topCar.getCarState().setRoadId(nextRoad.getId());//更新车的下一条路的状态
                                         updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), -1);//放入的方向是否正确？
                                         topCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
@@ -851,6 +867,7 @@ public class Judge {
                 }
             }
         }
+
         return -1;//放不下,说明所有车道已满
     }
     /**
@@ -1036,71 +1053,71 @@ public class Judge {
 
 /**暂时废弃方法**/
 /**
-private static void driveAllCarJustOnRoadToEndState(){
+ private static void driveAllCarJustOnRoadToEndState(){
 
-    ArrayList<Car> carRun = new ArrayList<>();//保存当前能动的车
-    for (Road road : roadList){//观察当前道路矩阵,取出当前所有在路上的车
-        if(road.getDirected() == 1){    //如果是双向车道，则遍历两个矩阵
-            //遍历S2E矩阵
-            MatrixTemp = road.getMatrix_S2E();
-            for(ArrayList<Car> lanesCar : MatrixTemp){
-                for(Car lengthCar : lanesCar){
-                    if(lengthCar.getId() != -1){//设定-1为空车
-                        carRun.add(lengthCar);
-                    }
-                }
-            }
-            //遍历E2S矩阵
-            MatrixTemp = road.getMatrix_E2S();
-            for(ArrayList<Car> lanesCar : MatrixTemp){
-                for(Car lengthCar : lanesCar){
-                    if(lengthCar.getId() != -1){//设定-1为空车
-                        carRun.add(lengthCar);
-                    }
-                }
-            }
-        } else{
-            //只遍历从 S2E矩阵
-            MatrixTemp = road.getMatrix_S2E();
-            for(ArrayList<Car> lanesCar : MatrixTemp){
-                for(Car lengthCar : lanesCar){
-                    if(lengthCar.getId() != -1){//设定-1为空车
-                        carRun.add(lengthCar);
-                    }
-                }
-            }
-        }
-    }
-    //针对可动的车，判断当前道路行驶还是路口等待
-    for(Car car : carRun){
-        if(carInCross(car)){//当前车可以行到路口，进行通过和不通过
-            Cross cross = getNowCross(car);//获取当前路口信息
-            Road roadPriority = ThroughCrossRule.RoadPriority(cross);//优先通行的道路
-            if(canCross(car)){ //如果可以通过
-                int length = ThroughCrossRule.Pass_or_Not(cross, lane, roadList, crossList);//返回通过的距离
-                if(length == 0){
-                    Road nowRoad = Util.getRoadFromId(car.getCarState().getRoadId(), roadList);
-                    //两种情况，1，该车准备通过路口，2，这个路口就是该车的终点
-                    if(car.getEnd() == nowRoad.getEnd() || car.getEnd() == nowRoad.getStart()){//在这条路正向或逆向行驶
-                        car.getCarState().setEnd(true);//标记已经到达终点
-                    }
-                    update(nowRoad);//表示车无法通过路口, 更新当前这条道路的矩阵
-                } else{
-                    //更新下条路的矩阵
-                    Road nextRoad = Util.getRoadFromId(nextRoadId, roadList);
-                    update(nextRoad);
-                }
-                car.getCarState().setRunning(false);//此时设置行车完成
-            }
-            car.getCarState().setWait(true);//不能通过路口，设置为等待状态
-        } else{
-            //车不靠近路口，在当前道路行驶，更新当前道路矩阵
-            Road nowRoad = Util.getRoadFromId(car.getCarState().getRoadId(), roadList);
-            update(nowRoad);
-            car.getCarState().setRunning(false);//表示行车完成
-        }
-    }
-}
+ ArrayList<Car> carRun = new ArrayList<>();//保存当前能动的车
+ for (Road road : roadList){//观察当前道路矩阵,取出当前所有在路上的车
+ if(road.getDirected() == 1){    //如果是双向车道，则遍历两个矩阵
+ //遍历S2E矩阵
+ MatrixTemp = road.getMatrix_S2E();
+ for(ArrayList<Car> lanesCar : MatrixTemp){
+ for(Car lengthCar : lanesCar){
+ if(lengthCar.getId() != -1){//设定-1为空车
+ carRun.add(lengthCar);
+ }
+ }
+ }
+ //遍历E2S矩阵
+ MatrixTemp = road.getMatrix_E2S();
+ for(ArrayList<Car> lanesCar : MatrixTemp){
+ for(Car lengthCar : lanesCar){
+ if(lengthCar.getId() != -1){//设定-1为空车
+ carRun.add(lengthCar);
+ }
+ }
+ }
+ } else{
+ //只遍历从 S2E矩阵
+ MatrixTemp = road.getMatrix_S2E();
+ for(ArrayList<Car> lanesCar : MatrixTemp){
+ for(Car lengthCar : lanesCar){
+ if(lengthCar.getId() != -1){//设定-1为空车
+ carRun.add(lengthCar);
+ }
+ }
+ }
+ }
+ }
+ //针对可动的车，判断当前道路行驶还是路口等待
+ for(Car car : carRun){
+ if(carInCross(car)){//当前车可以行到路口，进行通过和不通过
+ Cross cross = getNowCross(car);//获取当前路口信息
+ Road roadPriority = ThroughCrossRule.RoadPriority(cross);//优先通行的道路
+ if(canCross(car)){ //如果可以通过
+ int length = ThroughCrossRule.Pass_or_Not(cross, lane, roadList, crossList);//返回通过的距离
+ if(length == 0){
+ Road nowRoad = Util.getRoadFromId(car.getCarState().getRoadId(), roadList);
+ //两种情况，1，该车准备通过路口，2，这个路口就是该车的终点
+ if(car.getEnd() == nowRoad.getEnd() || car.getEnd() == nowRoad.getStart()){//在这条路正向或逆向行驶
+ car.getCarState().setEnd(true);//标记已经到达终点
+ }
+ update(nowRoad);//表示车无法通过路口, 更新当前这条道路的矩阵
+ } else{
+ //更新下条路的矩阵
+ Road nextRoad = Util.getRoadFromId(nextRoadId, roadList);
+ update(nextRoad);
+ }
+ car.getCarState().setRunning(false);//此时设置行车完成
+ }
+ car.getCarState().setWait(true);//不能通过路口，设置为等待状态
+ } else{
+ //车不靠近路口，在当前道路行驶，更新当前道路矩阵
+ Road nowRoad = Util.getRoadFromId(car.getCarState().getRoadId(), roadList);
+ update(nowRoad);
+ car.getCarState().setRunning(false);//表示行车完成
+ }
+ }
+ }
 
 
  //对当前道路的每个车道进行遍历扫描
@@ -1114,40 +1131,40 @@ private static void driveAllCarJustOnRoadToEndState(){
  continue;
  }
  if (//如果头车不过路口，就在当前道路上行驶) {
-        int putLane = lane;//保持原车道不变
-        int putLength = putLength();
-        updateRoad(topCar, road, putLane, putLength, 1);//更新当前道路矩阵
-        //更新车的状态信息
-        topCar.getCarState().setLane(lane);//保持原车道不变
-        topCar.getCarState().setPosition(putLength);
-        topCar.getCarState().setRunning(false);//行动完毕
-        topCar.getCarState().setWait(false);
-        continue;
-        }
-        //此时头车要过路口   TODO : 存在问题,优先级这个怎么使用
-        //考察我车所在车道是否具有行车控制权，没有则转让行车控制权给路口其他道路
-        ThroughCrossRule.Go_control_priority(topCar, cross, roadList, crossList);
-        int priority = cross.getControl_priority();
-        //如果没有优先权，标记车辆等待,转让给其他道路
-        Car priorityCar = Util.getCarFromId(priority, carList);
-        if (priority != 0) {
-        over = false;//标记是否可跳出循环
-        priorityCar.getCarState().setWait(true);//不具有优先级，标记等待
-        //TODO 之后怎么处理？？？
-        } else {
-        //开始通过路口
-        int length = ThroughCrossRule.Pass_or_Not(cross, lane, roadList, crossList);//通过后行驶的距离
-        if (length == 0) {//此时停车等待
-        updateRoad(priorityCar, road, lane, 0, 1);//0表示路口？
-        }
-        deleteRoadCar(priorityCar, road, 1);//更新本条路的矩阵,删除该车
-        Road nextRoad = getCarNextRoad(priorityCar);//获取下一条路
-        int putLane = putLane();
-        int putLength = length;
-        updateRoad(priorityCar, nextRoad, putLane, putLength, 1);//更新下一条路的矩阵
-        //标记车为已行驶完毕
-        priorityCar.getCarState().setRunning(false);
-        priorityCar.getCarState().setWait(false);
-        }
-        }
+ int putLane = lane;//保持原车道不变
+ int putLength = putLength();
+ updateRoad(topCar, road, putLane, putLength, 1);//更新当前道路矩阵
+ //更新车的状态信息
+ topCar.getCarState().setLane(lane);//保持原车道不变
+ topCar.getCarState().setPosition(putLength);
+ topCar.getCarState().setRunning(false);//行动完毕
+ topCar.getCarState().setWait(false);
+ continue;
+ }
+ //此时头车要过路口   TODO : 存在问题,优先级这个怎么使用
+ //考察我车所在车道是否具有行车控制权，没有则转让行车控制权给路口其他道路
+ ThroughCrossRule.Go_control_priority(topCar, cross, roadList, crossList);
+ int priority = cross.getControl_priority();
+ //如果没有优先权，标记车辆等待,转让给其他道路
+ Car priorityCar = Util.getCarFromId(priority, carList);
+ if (priority != 0) {
+ over = false;//标记是否可跳出循环
+ priorityCar.getCarState().setWait(true);//不具有优先级，标记等待
+ //TODO 之后怎么处理？？？
+ } else {
+ //开始通过路口
+ int length = ThroughCrossRule.Pass_or_Not(cross, lane, roadList, crossList);//通过后行驶的距离
+ if (length == 0) {//此时停车等待
+ updateRoad(priorityCar, road, lane, 0, 1);//0表示路口？
+ }
+ deleteRoadCar(priorityCar, road, 1);//更新本条路的矩阵,删除该车
+ Road nextRoad = getCarNextRoad(priorityCar);//获取下一条路
+ int putLane = putLane();
+ int putLength = length;
+ updateRoad(priorityCar, nextRoad, putLane, putLength, 1);//更新下一条路的矩阵
+ //标记车为已行驶完毕
+ priorityCar.getCarState().setRunning(false);
+ priorityCar.getCarState().setWait(false);
+ }
+ }
  **/

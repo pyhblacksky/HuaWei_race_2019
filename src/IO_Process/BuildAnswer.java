@@ -20,33 +20,34 @@ public class BuildAnswer {
      * @Function: 返回答案的数据结构
      * 可调参数：   时间， 发车间隔， 每次发多少辆车
      * */
-    //public static ArrayList<Answer> buildAnswer(ArrayList<Car> carList){
-    //    if(carList == null || carList.size() == 0){
-    //        return null;
-    //    }
-    //    ArrayList<Answer> answers = new ArrayList<>();
-    //    int time = 1;   //时间
-    //    int count = 1;
-    //    for(Car car : carList){
-    //        if(time < car.getTime()){//如果准备发车时间大于计划发车时间，则以计划发车时间为准
-    //            time = car.getTime();
-    //        }
-    //        Answer answer = new Answer(car.getId(), time, car.getRoads());
-    //        answers.add(answer);
-    //        if(count % 165 == 0){   //此处的模数为多少辆车发车
-    //            time += car.getWeight()/3;  //更改发车时间
-    //        }
-    //        count++;
-    //    }
-    //    return answers;
-    //}
     public static ArrayList<Answer> buildAnswer(ArrayList<Car> carList){
         if(carList == null || carList.size() == 0){
             return null;
         }
         ArrayList<Answer> answers = new ArrayList<>();
         int time = 1;   //时间
-        int count = 1;  //车辆计数
+        int count = 1;
+
+        for(Car car : carList){
+            if(time < car.getTime()){//如果准备发车时间大于计划发车时间，则以计划发车时间为准
+                time = car.getTime();
+            }
+            Answer answer = new Answer(car.getId(), time, car.getRoads());
+            answers.add(answer);
+            if(count % 5 == 0){   //此处的模数为多少辆车发车
+                time = car.getWeight();  //更改发车时间
+            }
+            count++;
+        }
+        return answers;
+    }
+    public static ArrayList<Answer> buildAnswer1(ArrayList<Car> carList){
+        if(carList == null || carList.size() == 0){
+            return null;
+        }
+        ArrayList<Answer> answers = new ArrayList<>();
+        int time = 1;   //时间
+        int count = 1;	//车辆计数
         int cut1 = carList.size()/6 * 5;//总长度的 5/6
         int cut2 = cut1 / 2; // 二次切分，中段路
         int t2 = 1;//区分时间
