@@ -34,8 +34,8 @@ public class BuildAnswer {
             }
             Answer answer = new Answer(car.getId(), time, car.getRoads());
             answers.add(answer);
-            if(count % 5 == 0){   //此处的模数为多少辆车发车
-                time = car.getWeight();  //更改发车时间
+            if(count % 165 == 0){   //此处的模数为多少辆车发车
+                time += car.getWeight() / 3;  //更改发车时间
             }
             count++;
         }

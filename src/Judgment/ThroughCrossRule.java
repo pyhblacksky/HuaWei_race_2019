@@ -530,7 +530,12 @@ public class ThroughCrossRule {
 
                             return (Math.min(Next_road.getLength(), pass_or_not));
                         } else if (Lastcar_Nextroad_loc == 0) {
-                            if (lane_temp == Next_road.getLanes())    return 0;
+                            if (lane_temp == Next_road.getLanes()) {
+                                CarState carstate_temp=Topcar.getCarState();
+                                carstate_temp.setPosition(Thisroad.getLength()-1);
+                                Topcar.setCarState(carstate_temp);
+                                return 0;
+                            }
                             else                                      lane_temp = lane_temp + 1;
                         } else {
                             Topcar.getCarState().setLane(lane_temp-1);
@@ -564,7 +569,12 @@ public class ThroughCrossRule {
                             Topcar.setCarState(carstate_temp);
                             return (Math.min(Next_road.getLength(), pass_or_not));
                         } else if (Lastcar_Nextroad_loc == 0) {
-                            if (lane_temp == Next_road.getLanes())    return 0;
+                            if (lane_temp == Next_road.getLanes()) {
+                                CarState carstate_temp=Topcar.getCarState();
+                                carstate_temp.setPosition(Thisroad.getLength()-1);
+                                Topcar.setCarState(carstate_temp);
+                                return 0;
+                            }
                             else                                      lane_temp = lane_temp + 1;
                         } else {
                             Topcar.getCarState().setLane(lane_temp-1);
@@ -596,7 +606,12 @@ public class ThroughCrossRule {
                             Topcar.getCarState().setLane(lane_temp-1);
                             return (Math.min(Next_road.getLength(), pass_or_not));
                         } else if (Lastcar_Nextroad_loc == 0) {
-                            if (lane_temp == Next_road.getLanes())    return 0;
+                            if (lane_temp == Next_road.getLanes()) {//当前存在位置可走
+                                CarState carstate_temp=Topcar.getCarState();
+                                carstate_temp.setPosition(Thisroad.getLength()-1);
+                                Topcar.setCarState(carstate_temp);
+                                return 0;
+                            }
                             else                                      lane_temp = lane_temp + 1;
                         } else {
                             Topcar.getCarState().setLane(lane_temp-1);

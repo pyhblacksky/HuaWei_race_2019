@@ -145,6 +145,7 @@ public class Main {
 
             sumTimeEnd = System.currentTimeMillis();
             System.out.println("程序花费总时间为：" + (sumTimeEnd - sumTimeStart) + "ms");
+            //System.out.println("answer大小：" + answerList.size());
 
         }catch (Exception e){
             e.printStackTrace();

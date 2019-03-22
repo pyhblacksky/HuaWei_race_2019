@@ -76,12 +76,17 @@ public class Judge {
                 //        break;
                 //    }
                 //}
-
+                if(Time > 800){
+                    break;
+                }
                 driveAllCarJustOnRoadToEndState();
             }
 
             if(deadLock){//通过标记跳出整个循环
                 return Integer.MAX_VALUE;   //表示运行超时
+            }
+            if(Time > 800){
+                break;
             }
 
             /* 车库中的车辆上路行驶 */
@@ -238,7 +243,11 @@ public class Judge {
                                         deleteRoadCar(topCar, road, 1);//删除这条路上的该车
                                         Road nextRoad = getNextRoad(topCar);
                                         topCar.getCarState().setRoadId(nextRoad.getId());//更新车的下一条路的状态
-                                        updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), 1);//放入的方向是否正确？
+                                        if(nextRoad.getEnd() == cross.getId()) {//以下一条路的方向判断更新矩阵
+                                            updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), -1);//放入的方向是否正确？
+                                        } else {
+                                            updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), 1);//放入的方向是否正确？
+                                        }
                                         topCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
                                     }
                                 } else {
@@ -326,7 +335,11 @@ public class Judge {
                                         deleteRoadCar(topCar, road, -1);//删除这条路上的该车
                                         Road nextRoad = getNextRoad(topCar);
                                         topCar.getCarState().setRoadId(nextRoad.getId());//更新车的下一条路的状态
-                                        updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), -1);//放入的方向是否正确？
+                                        if(nextRoad.getEnd() == cross.getId()) {//以下一条路的方向判断更新矩阵
+                                            updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), -1);//放入的方向是否正确？
+                                        } else {
+                                            updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), 1);//放入的方向是否正确？
+                                        }
                                         topCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
                                     }
                                 } else {
@@ -488,14 +501,14 @@ public class Judge {
             //正向，更新S2E矩阵
             road.setMatrix_S2E(car, putLane, putLength);
             //更新车的状态
-            car.getCarState().setLane(putLane);
-            car.getCarState().setPosition(putLength);
+            //car.getCarState().setLane(putLane);
+            //car.getCarState().setPosition(putLength);
         } else if(PorN == -1){
             //逆向，更新E2S矩阵
             road.setMatrix_E2S(car, putLane, putLength);
             //更新车的状态
-            car.getCarState().setLane(putLane);
-            car.getCarState().setPosition(putLength);
+            //car.getCarState().setLane(putLane);
+            //car.getCarState().setPosition(putLength);
         }
     }
 
