@@ -30,6 +30,7 @@ public class CarState implements Serializable {
     public CarState(){
         this.isInGarage = true;//默认在车库中
         this.isWait = false;//默认等待状态为false
+        this.isRunning = false;
     }
 
     public int getRoadId() {

@@ -209,6 +209,30 @@ public class Road implements Serializable {
         }
         return loc;
     }
+    //获取正常的车，wait为true的车
+    public int getWaitCarlocation_E2S(int lane){
+        int loc = -1;     //-1默认值，认为是空车道
+        ArrayList<ArrayList<Car>> Matrix_temp = new ArrayList<>(this.matrix_E2S);
+        for (int i = this.length - 1; i >= 0; i--){
+            if (Matrix_temp.get(lane-1).get(i).getId() != -1 && Matrix_temp.get(lane-1).get(i).getCarState().isWait()) {
+                loc = i;
+                break;
+            }
+        }
+        return loc;
+    }
+    public int getWaitCarlocation_S2E(int lane){
+        int loc = -1;     //-1默认值，认为是空车道
+        ArrayList<ArrayList<Car>> Matrix_temp = new ArrayList<>(this.matrix_S2E);
+        for (int i = this.length - 1; i >= 0; i--){
+            if (Matrix_temp.get(lane-1).get(i).getId() != -1 && Matrix_temp.get(lane-1).get(i).getCarState().isWait()) {
+                loc = i;
+                break;
+            }
+        }
+        return loc;
+    }
+
 
     //获取尾车，从右到左
     public int get_Lastcar_location_E2S(int lane) {
