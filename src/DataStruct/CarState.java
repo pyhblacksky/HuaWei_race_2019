@@ -33,6 +33,17 @@ public class CarState implements Serializable {
         this.isRunning = false;
     }
 
+    //浅拷贝构造函数
+    public CarState(CarState carState){
+        this.roadId = carState.getRoadId();
+        this.lane = carState.getLane();
+        this.position = carState.getPosition();
+        this.isInGarage = carState.isInGarage();//默认在车库中
+        this.isWait = carState.isWait();
+        this.isRunning = carState.isRunning();
+        this.isEnd = carState.isEnd();
+    }
+
     public int getRoadId() {
         return roadId;
     }

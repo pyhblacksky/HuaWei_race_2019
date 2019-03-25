@@ -34,6 +34,16 @@ public class Cross {
         this.Control_priority = Control_priority;
     }
 
+    //浅拷贝构造函数
+    public Cross(Cross cross){
+        this.id = cross.getId();
+        this.upRoad = new Road(cross.getUpRoad());
+        this.rightRoad = new Road(cross.getRightRoad());
+        this.downRoad = new Road(cross.getDownRoad());
+        this.leftRoad = new Road(cross.getLeftRoad());
+        this.Control_priority = cross.getControl_priority();
+    }
+
     //get 和 set方法
     public int getId() {
         return id;

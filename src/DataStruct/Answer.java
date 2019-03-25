@@ -23,6 +23,13 @@ public class Answer {
         this.roads = roads;
     }
 
+    //浅拷贝构造函数
+    public Answer(Answer answer){
+        this.carId = answer.getCarId();
+        this.time = answer.getTime();
+        this.roads = new ArrayList<>(answer.getRoads());
+    }
+
     public int getCarId() {
         return carId;
     }

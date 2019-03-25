@@ -48,6 +48,20 @@ public class Car implements Serializable {
         this.realTime = 0;
     }
 
+    //浅贝构造函数
+    public Car(Car car){
+        this.id = car.getId();
+        this.start = car.getStart();
+        this.end = car.getEnd();
+        MaxSpeed = car.getMaxSpeed();
+        this.time = car.getTime();
+        this.weight = car.getWeight();
+        this.realTime = car.getRealTime();
+        this.forbidRoads = new ArrayList<>(car.getForbidRoads());
+        this.carState = new CarState(car.getCarState());
+        this.roads = new ArrayList<>(car.getRoads());
+    }
+
     public int getId() {
         return id;
     }

@@ -64,6 +64,20 @@ public class Road implements Serializable {
         }
     }
 
+    //浅拷贝构造函数
+    public Road(Road road){
+        this.id = road.getId();
+        this.length = road.getLength();
+        this.MaxSpeed = road.getMaxSpeed();
+        this.lanes = road.getLanes();
+        this.start = road.getStart();
+        this.end = road.getEnd();
+        this.directed = road.getDirected();
+        this.weight = road.getWeight();
+        this.matrix_S2E = new ArrayList<>(road.getMatrix_S2E());
+        this.matrix_E2S = new ArrayList<>(road.getMatrix_E2S());
+    }
+
     //只有道路编号，起点终点id的路结构
     public Road(int id, int start, int end) {
         this.id = id;
