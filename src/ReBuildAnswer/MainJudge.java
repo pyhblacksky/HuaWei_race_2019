@@ -54,6 +54,7 @@ public class MainJudge {
             /*****测试——到达终点的车****/
             ArrayList<Car> endCar = getInEndCar();
             //System.out.println(endCar);
+            ArrayList<Car> roadHasCar = getInRoadCar();
             /******测试——计算已满路******/
             ArrayList<Road> fullRoad = countFullRoad();//计算已满路
             /*****************************/
@@ -92,15 +93,39 @@ public class MainJudge {
 
 
             if(isAllRoadEmpty()){//如果道路为空，发出第一批车
-                driveCarInGarage(20);
+                driveCarInGarage(Time+20);//默认这批次车可跑通，此处可调试
+                //生成并记录answer
+                ArrayList<Car> inRoadCar = getInRoadCar();
+                for(Car car : inRoadCar){
+                    Answer answer = new Answer(car.getId(), car.getRealTime(), car.getRoads());
+                    finalAnswer.add(answer);
+                }
             } else{
-                /*如果当前路上的车没有出现死锁，则我认为可行，正常发车*/
-
+                if(Time % 1 == 0) {//5个时间单位操作一次?
+                    /*假设发一批车，如果当前路上的车没有出现死锁，则我认为可行，正常发车,并添加进结果集*/
+                    ArrayList<Car> inRoadCar = getInRoadCar();//当前在路上的车
+                    ArrayList<Car> canRunCar = getInGarageCar();//getInGarageCar()还在车库中的车
+                    if(canRunCar.size() != 0) {//此时可发车数不小于0才执行以下的行为
+                        ArrayList<Car> nextCars = getPartList(canRunCar, Math.min(canRunCar.size(), 100));//下一批要发出的车,此处截取0——100辆车,可调节
+                        int LimitTime = nextCars.get(0).getWeight() + 50;//认为其超时的时间,现在以首车的时间作为其超时时间, 50是其活动阈值，可调节
+                        if (PredictJudge.judgeNoDeadLock(inRoadCar, crossList, nextCars, roadList, LimitTime)) {
+                            driveCarInGarage(nextCars);//真实发车
+                            //此时返回可行，生成并记录answer，真实的发出这批车
+                            for (Car car : nextCars) {
+                                //此处answer的时间是   当前时间+车在测试集中的实际发车时间
+                                Answer answer = new Answer(car.getId(), Time + car.getRealTime(), car.getRoads());
+                                finalAnswer.add(answer);
+                            }
+                        } else {
+                            //此时不可行，怎么办？    换车还是重新规划路径？还是多等一段时间？
+                            //考虑多久进行一次操作？？？
+                            //TODO
+                            int a = 0;
+                        }
+                    }
+                }
             }
 
-            ArrayList<Car> inRoadCar = getInRoadCar();//当前在路上的车
-            /* 车库中的车辆上路行驶 */
-            driveCarInGarage(Time);
             //行车完成，将所有车设置为可行状态,除了已经到达终点的车
             setCarCanRun();
 
@@ -643,6 +668,73 @@ public class MainJudge {
     /**********************************************************************************************************/
 
     /**
+     * 重构发车函数，指定车列表发车
+     * 将这一批次车发出去
+     * */
+    private static void driveCarInGarage(ArrayList<Car> cars){
+        for (Car car : cars) {
+            if (car.getCarState().isEnd()) {  //如果该车已经到达终点，则不对这辆车做任何变化
+                continue;
+            }
+            if (!car.getCarState().isInGarage()) {//如果该车已经不在车库，跳过
+                continue;
+            }
+            Road goCarRoad = null;
+            int carStart = -1;//获取当前车的起点
+            if (car != null && car.getRoads() != null && car.getRoads().size() != 0) {
+                goCarRoad = car.getRoads().get(0);//取该车的可行路list中的第一个
+                carStart = car.getStart();
+            }
+            if (isRoadFull(goCarRoad, car)) {  //如果前车已经将道路占满，则推迟发车
+                car.setRealTime(car.getRealTime() + 1);
+                continue;
+            }
+            //确定道路行驶方向,存在双向和单向两种车道，车的起点和路的起点相同
+            if (carStart == goCarRoad.getStart()) {
+                //此时放入 S2E矩阵
+                int i = putLane(goCarRoad, 1);//表示车道
+                int j = putLength(goCarRoad, car, 1);//表示放入长度
+                if (i == -1 || j == -1) {//说明放不下，时间推迟，下一个车
+                    car.setRealTime(car.getRealTime() + 1);
+                    continue;
+                }
+                goCarRoad.setMatrix_S2E(car, i, j);
+                //更新车的状态，当前所在道路及相关信息
+                car.getCarState().setRoadId(goCarRoad.getId());
+                car.getCarState().setLane(i);//设置车道
+                car.getCarState().setPosition(j);//设置当前位置
+                car.getCarState().setRunning(false);//车已行动完毕
+                car.getCarState().setInGarage(false);//车从车库中发出
+            } else if (carStart == goCarRoad.getEnd()) {
+                //此时放入 E2S矩阵
+                int i = putLane(goCarRoad, -1);
+                int j = putLength(goCarRoad, car, -1);
+                if (i == -1 || j == -1) {//说明放不下，时间推迟，下一个车
+                    car.setRealTime(car.getRealTime() + 1);
+                    continue;
+                }
+                goCarRoad.setMatrix_E2S(car, i, j);
+                car.getCarState().setRoadId(goCarRoad.getId());
+                car.getCarState().setLane(i);//设置车道
+                car.getCarState().setPosition(j);//设置当前位置
+                car.getCarState().setRunning(false);//车已行动完毕
+                car.getCarState().setInGarage(false);//车从车库中发出
+            }
+        }
+    }
+    /**
+     * 判断当前车列表中是否有不在车库中的车
+     * */
+    private static boolean hasInGarageCar(ArrayList<Car> cars){
+        for(Car car : cars){
+            if(car.getId() != -1 && car.getCarState().isInGarage()){//存在在车库中的车
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 车库中的车辆上路行驶
      * */
     private static void driveCarInGarage(int time){
@@ -682,6 +774,7 @@ public class MainJudge {
                     car.getCarState().setPosition(j);//设置当前位置
                     car.getCarState().setRunning(false);//车已行动完毕
                     car.getCarState().setInGarage(false);//车从车库中发出
+                    car.setRealTime(time);//设置车的真实发车时间
                 } else if(carStart == goCarRoad.getEnd()){
                     //此时放入 E2S矩阵
                     int i = putLane(goCarRoad, -1);
@@ -696,6 +789,7 @@ public class MainJudge {
                     car.getCarState().setPosition(j);//设置当前位置
                     car.getCarState().setRunning(false);//车已行动完毕
                     car.getCarState().setInGarage(false);//车从车库中发出
+                    car.setRealTime(time);//设置车的真实发车时间
                 }
             } else{
                 break;//超过本次时间，跳出
@@ -1384,15 +1478,31 @@ public class MainJudge {
     }
 
     /**
-     * 获取还在车库中的车
-     * 已浅拷贝
+     * 获取还在车库中的车。  相当于此时可选的发车车辆
+     * 不使用浅拷贝
      * */
     private static ArrayList<Car> getInGarageCar(){
         ArrayList<Car> res = new ArrayList<>();
         for(Car car : carList){
             if(car.getId() != -1 && car.getCarState().isInGarage()){
-                res.add(new Car(car));
+                res.add(car);
             }
+        }
+        return res;
+    }
+
+    /**
+     * 取出部分Car的操作函数
+     * 返回一个目标列表
+     * */
+    private static ArrayList<Car> getPartList(ArrayList<Car> cars, int num){
+        if(num <= 0 || num > cars.size()){
+            throw new IllegalArgumentException("当前要截取的数据长度  小于或大于整个列表的长度");
+        }
+
+        ArrayList<Car> res = new ArrayList<>();
+        for(int i = 0; i < num; i++){
+            res.add(cars.get(i));
         }
         return res;
     }

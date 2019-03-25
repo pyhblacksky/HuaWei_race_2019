@@ -26,30 +26,39 @@ public class PredictJudge {
      * @param inRoadCars 当前在路上的car列表
      * @param crosses cross列表
      * @param roads road列表
+     * @param nextCars 预计发出车辆
      *
      * @return 返回当前道路上的车是否可以走完
      * */
-    public static boolean judgeNoDeadLock(ArrayList<Car> inRoadCars, ArrayList<Cross> crosses,
+    public static boolean judgeNoDeadLock(ArrayList<Car> inRoadCars, ArrayList<Cross> crosses, ArrayList<Car> nextCars,
                             ArrayList<Road> roads, int LimitTime){
         /**************************数据预处理***************************/
-        roadList = new ArrayList<>(roads);
-        carList = new ArrayList<>(inRoadCars);
+        /**此处必须浅拷贝，否则会出现已跑完的现象**/
+        ArrayList<Car> allCar = new ArrayList<>();//记录所有存在的当前车
+        for(Car car : nextCars){
+            allCar.add(new Car(car));
+        }
+        for(Car car : inRoadCars){
+            allCar.add(new Car(car));
+        }
+
+        roadList = new ArrayList<>();
+        for(Road road : roads){
+            roadList.add(new Road(road));
+        }
+        carList = new ArrayList<>(allCar);
+
         crossList = new ArrayList<>(crosses);
+        for(Cross cross : crosses){
+            crossList.add(new Cross(cross));
+        }
 
         /**************************************************************/
         /* 按时间片处理 */
         int Time = 1;//从时间1开始
         boolean forceJump = false;// 是否是强制跳出
         for(; ;Time++) {
-            /*****测试——当前在路上的车****/
-            ArrayList<Car> inRoadCar = getInRoadCar();
-            //System.out.println(inRoadCar);
-            /*****测试——到达终点的车****/
-            ArrayList<Car> endCar = getInEndCar();
-            //System.out.println(endCar);
-            /******测试——计算已满路******/
-            ArrayList<Road> fullRoad = countFullRoad();//计算已满路
-            int endCarSumInRoadCar = inRoadCar.size() + endCar.size();
+            driveCarInGarage(nextCars);//发出指定的车
             /*****************************/
 
             /******************第一步********************/
@@ -104,6 +113,72 @@ public class PredictJudge {
             return false;
         }
         return true;//认为可以走完
+    }
+
+    /**
+     * 重构发车函数，指定车列表发车
+     * */
+    private static void driveCarInGarage(ArrayList<Car> cars){
+        for (Car car : cars) {
+           if (car.getCarState().isEnd()) {  //如果该车已经到达终点，则不对这辆车做任何变化
+               continue;
+           }
+           if (!car.getCarState().isInGarage()) {//如果该车已经不在车库，跳过
+               continue;
+           }
+           Road goCarRoad = null;
+           int carStart = -1;//获取当前车的起点
+           if (car != null && car.getRoads() != null && car.getRoads().size() != 0) {
+               goCarRoad = car.getRoads().get(0);//取该车的可行路list中的第一个
+               carStart = car.getStart();
+           }
+           if (isRoadFull(goCarRoad, car)) {  //如果前车已经将道路占满，则推迟发车
+               car.setRealTime(car.getRealTime() + 1);
+               continue;
+           }
+           //确定道路行驶方向,存在双向和单向两种车道，车的起点和路的起点相同
+           if (carStart == goCarRoad.getStart()) {
+               //此时放入 S2E矩阵
+               int i = putLane(goCarRoad, 1);//表示车道
+               int j = putLength(goCarRoad, car, 1);//表示放入长度
+               if (i == -1 || j == -1) {//说明放不下，时间推迟，下一个车
+                   car.setRealTime(car.getRealTime() + 1);
+                   continue;
+               }
+               goCarRoad.setMatrix_S2E(car, i, j);
+               //更新车的状态，当前所在道路及相关信息
+               car.getCarState().setRoadId(goCarRoad.getId());
+               car.getCarState().setLane(i);//设置车道
+               car.getCarState().setPosition(j);//设置当前位置
+               car.getCarState().setRunning(false);//车已行动完毕
+               car.getCarState().setInGarage(false);//车从车库中发出
+           } else if (carStart == goCarRoad.getEnd()) {
+               //此时放入 E2S矩阵
+               int i = putLane(goCarRoad, -1);
+               int j = putLength(goCarRoad, car, -1);
+               if (i == -1 || j == -1) {//说明放不下，时间推迟，下一个车
+                   car.setRealTime(car.getRealTime() + 1);
+                   continue;
+               }
+               goCarRoad.setMatrix_E2S(car, i, j);
+               car.getCarState().setRoadId(goCarRoad.getId());
+               car.getCarState().setLane(i);//设置车道
+               car.getCarState().setPosition(j);//设置当前位置
+               car.getCarState().setRunning(false);//车已行动完毕
+               car.getCarState().setInGarage(false);//车从车库中发出
+           }
+        }
+    }
+    /**
+     * 判断当前车列表中是否有不在车库中的车
+     * */
+    private static boolean hasInGarageCar(ArrayList<Car> cars){
+        for(Car car : cars){
+            if(car.getId() != -1 && car.getCarState().isInGarage()){//存在在车库中的车
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
