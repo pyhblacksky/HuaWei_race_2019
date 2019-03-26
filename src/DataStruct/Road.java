@@ -11,7 +11,7 @@ import java.util.List;
  * @Function:   路数据结构
  */
 public class Road implements Serializable {
-    //private static final long serialVersionUID = 10L;//序列化
+    //序列化
 
     private int id; //道路id
     private int length; //道路长度

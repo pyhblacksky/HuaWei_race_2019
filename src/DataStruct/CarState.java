@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @Function:   车在当前道路上行驶的状态
  */
 public class CarState implements Serializable {
-    private static final long serialVersionUID = 10L;//序列化
+    //序列化
 
     public int roadId;     //当前车辆行驶的道路id
     public int lane;       //在当前道路上行驶的车道

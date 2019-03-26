@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * @Function:   车辆的数据结构
  */
 public class Car implements Serializable {
-    //private static final long serialVersionUID = 10L;//序列化
+    //序列化
 
     private int id;     //车辆id
     private int start;  //起点
