@@ -10,6 +10,7 @@ package ReBuildAnswer;
  */
 
 import DataStruct.*;
+import IO_Process.SerializableTest;
 import Util.Util;
 import java.util.*;
 
@@ -28,37 +29,96 @@ public class PredictJudge {
      * @param roads road列表
      * @param nextCars 预计发出车辆
      *
+     * @return forbidRoadIdList : 禁止路列表
      * @return 返回当前道路上的车是否可以走完
      * */
     public static boolean judgeNoDeadLock(ArrayList<Car> inRoadCars, ArrayList<Cross> crosses, ArrayList<Car> nextCars,
-                            ArrayList<Road> roads, int LimitTime){
+                            ArrayList<Road> roads, int LimitTime, ArrayList<Integer> forbidRoadIdList){
         /**************************数据预处理***************************/
-        /**此处必须浅拷贝，否则会出现已跑完的现象**/
-        ArrayList<Car> allCar = new ArrayList<>();//记录所有存在的当前车
-        for(Car car : nextCars){
-            allCar.add(new Car(car));
-        }
-        for(Car car : inRoadCars){
-            allCar.add(new Car(car));
-        }
+        /**此处必须深拷贝，否则会出现已跑完的现象，需要完全一样的代码副本，实现clone接口**/
+        //ArrayList<Car> allCar = new ArrayList<>();
+        //for(Car car : inRoadCars){
+        //    allCar.add(car);
+        //}
+        //for(Car car : nextCars){
+        //    allCar.add(car);
+        //}
+        //carList = new ArrayList<>(allCar);
+        //crossList = new ArrayList<>(crosses);
+        //roadList = new ArrayList<>(roads);
+        //
+        //Collections.sort(carList, new Comparator<Car>() {
+        //    @Override
+        //    public int compare(Car o1, Car o2) {
+        //        return o1.getId() - o2.getId();
+        //    }
+        //});
 
-        roadList = new ArrayList<>();
-        for(Road road : roads){
-            roadList.add(new Road(road));
-        }
-        carList = new ArrayList<>(allCar);
+        //反序列化
+        ArrayList<Object> obj = SerializableTest.DeAllSerialize("AllObject.txt");
 
-        crossList = new ArrayList<>(crosses);
+        roadList = (ArrayList<Road>) obj.get(0);
+        crossList = (ArrayList<Cross>) obj.get(1);
+        ArrayList<Car> inRoadCar = (ArrayList<Car>) obj.get(2);
+        ArrayList<Car> nextCar = (ArrayList<Car>) obj.get(3);
+        /*****************************/
+        //将车中道路重设
+        for(Car car : inRoadCar){
+            ArrayList<Road> getInRoadCarList = car.getRoads();
+            ArrayList<Road> setInRoadCarList = new ArrayList<>();
+            for(Road road : getInRoadCarList){
+                setInRoadCarList.add(Util.getRoadFromId(road.getId(), roadList));
+            }
+            car.setRoads(setInRoadCarList);
+        }
+        for(Car car : nextCar){
+            ArrayList<Road> getInRoadCarList = car.getRoads();
+            ArrayList<Road> setInRoadCarList = new ArrayList<>();
+            for(Road road : getInRoadCarList){
+                setInRoadCarList.add(Util.getRoadFromId(road.getId(), roadList));
+            }
+            car.setRoads(setInRoadCarList);
+        }
+        /*****************************/
+        //Cross也要进行重设
         for(Cross cross : crosses){
-            crossList.add(new Cross(cross));
+            Road upRoad = Util.getRoadFromId(cross.getUpRoad().getId(), roadList);
+            if(upRoad != null) {
+                cross.setUpRoad(upRoad);
+            }
+            Road downRoad = Util.getRoadFromId(cross.getDownRoad().getId(), roadList);
+            if(downRoad != null) {
+                cross.setDownRoad(downRoad);
+            }
+            Road leftRoad = Util.getRoadFromId(cross.getLeftRoad().getId(), roadList);
+            if(leftRoad != null) {
+                cross.setLeftRoad(leftRoad);
+            }
+            Road rightRoad = Util.getRoadFromId(cross.getRightRoad().getId(), roadList);
+            if(rightRoad != null) {
+                cross.setRightRoad(rightRoad);
+            }
         }
+        ///****************************/
+        carList = new ArrayList<>(inRoadCar.size() + nextCar.size());
+        for(Car car : inRoadCar){
+            carList.add(car);
+        }
+        for(Car car : nextCar){
+            carList.add(car);
+        }
+
 
         /**************************************************************/
         /* 按时间片处理 */
         int Time = 1;//从时间1开始
         boolean forceJump = false;// 是否是强制跳出
+        driveCarInGarage(nextCar);//发出指定的车,剩下没发出的不管
         for(; ;Time++) {
-            driveCarInGarage(nextCars);//发出指定的车
+            /*****测试——到达终点的车****/
+            ArrayList<Car> endCar = getInEndCar();
+            //System.out.println(endCar);
+            ArrayList<Car> roadHasCar = getInRoadCar();
             /*****************************/
 
             /******************第一步********************/
@@ -103,6 +163,10 @@ public class PredictJudge {
 
             //超过限制时间，强制跳出，出现死锁，认为其走不通
             if(Time >= LimitTime){
+                ArrayList<Road> fullRoad = countFullRoad();//满载的路
+                for(Road road : fullRoad){
+                    forbidRoadIdList.add(road.getId());
+                }
                 forceJump = true;
                 break;
             }
@@ -131,6 +195,9 @@ public class PredictJudge {
            if (car != null && car.getRoads() != null && car.getRoads().size() != 0) {
                goCarRoad = car.getRoads().get(0);//取该车的可行路list中的第一个
                carStart = car.getStart();
+           }
+           if(goCarRoad == null){
+               continue;
            }
            if (isRoadFull(goCarRoad, car)) {  //如果前车已经将道路占满，则推迟发车
                car.setRealTime(car.getRealTime() + 1);
@@ -1264,7 +1331,7 @@ public class PredictJudge {
             //k大于当前可行驶道路，说明到达终点，返回-1表示结束
             return null;
         }
-        Road NextRoad = path.get(k+1);//下一条要行驶的道路   k+1
+        Road NextRoad = Util.getRoadFromId(path.get(k+1).getId(), roadList);//下一条要行驶的道路   k+1
         return NextRoad;
     }
 
