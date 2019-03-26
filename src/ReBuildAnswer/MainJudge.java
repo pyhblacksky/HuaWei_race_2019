@@ -7,6 +7,7 @@ package ReBuildAnswer;
  * @Function:
  *      主判题器，用于生成answer
  *          其中包含副判题器做预测
+ *          如果要发车辆发出不堵，则真实不堵，则发车
  */
 
 import Astar.AFind;
@@ -88,8 +89,10 @@ public class MainJudge {
                 for(Cross cross : crossList){
                     //获取该路口的道路优先级
                     ArrayList<Road> priorityRoad = ThroughRule.RoadPriority(cross);//按照道路序号升序
-                    for(Road road : priorityRoad){
-                        driveCrossCar(road, cross);
+                    while(isCrossAllRoadCarWait(cross, priorityRoad)) {
+                        for (Road road : priorityRoad) {
+                            driveCrossCar(road, cross);
+                        }
                     }
                 }
             }
@@ -170,6 +173,36 @@ public class MainJudge {
 
         }
         return finalAnswer;
+    }
+
+    /**
+     * 查看该路口的路的车是否已经进行完等待状态
+     * */
+    private static boolean isCrossAllRoadCarWait(Cross cross, ArrayList<Road> roads){
+        for(Road road : roads){
+            //根据road的起点终点判断遍历哪个矩阵
+            if(road.getEnd() == cross.getId()){
+                ArrayList<ArrayList<Car>> matrix = road.getMatrix_S2E();
+                for(ArrayList<Car> lanes : matrix){
+                    for(Car car : lanes){
+                        if(car.getId() != -1 && car.getCarState().isWait()){
+                            return true;
+                        }
+                    }
+                }
+            } else if(road.getStart() == cross.getId()){
+                //双向，先遍历E2S
+                ArrayList<ArrayList<Car>> matrix = road.getMatrix_E2S();
+                for(ArrayList<Car> lanes : matrix){
+                    for(Car car : lanes){
+                        if(car.getId() != -1 && car.getCarState().isWait()){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**

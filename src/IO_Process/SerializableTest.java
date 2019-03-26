@@ -156,6 +156,49 @@ public class SerializableTest {
         return null;
     }
 
+    /**********************************************************************************/
+    //当前carList、RoadList、crossList全部序列化
+    public static void NowStateSerialize(ArrayList<Cross> crossList, ArrayList<Road> roadList,
+                                    ArrayList<Car> carList, String fileName){
+        try{
+            //序列化
+            File file = new File(fileName);
+            if(file.exists()){
+                file.delete();
+            }
+            OutputStream op = new FileOutputStream(fileName);//保存的临时文件名
+
+            ObjectOutputStream ops = new ObjectOutputStream(op);
+            ops.writeObject(roadList);
+            ops.writeObject(crossList);
+            ops.writeObject(carList);
+            ops.close();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public static ArrayList<Object> DeNowStateSerialize(String fileName){
+        try {
+            InputStream in = new FileInputStream(fileName);
+            ObjectInputStream os = new ObjectInputStream(in);
+
+            ArrayList<Road> roadList = (ArrayList<Road>) os.readObject();
+            ArrayList<Cross> crossList = (ArrayList<Cross>) os.readObject();
+            ArrayList<Car> carList = (ArrayList<Car>) os.readObject();
+
+            ArrayList<Object> obj = new ArrayList<>();
+            obj.add(roadList);
+            obj.add(crossList);
+            obj.add(carList);
+
+            os.close();
+            return obj;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 /**************************************************************************************************************/
 /*

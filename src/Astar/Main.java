@@ -3,10 +3,10 @@ package Astar;
 import DataStruct.*;
 import IO_Process.BuildAnswer;
 import IO_Process.IOProcess;
-import Judgment.DeadLock;
-import Judgment.FindLoop;
-import Judgment.Judge;
-import Judgment.ThroughCrossRule;
+import Judgment.*;
+import ReBuildAnswer.MainJudge;
+import ReBuildAnswer.MainJudge2;
+import ReBuildAnswer.MainJudge3;
 import Util.Util;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class Main {
         try {
             /*********************************************读取文件********************************************/
             String readFile = "src\\Data\\bin\\";
-            String config = "config_11\\";
+            String config = "config_12\\";
             //读取道路
             String pathNameRoad = readFile + config +"Road.txt";//文件绝对路径
             ArrayList<String> roadStr = new ArrayList<>();
@@ -50,6 +50,28 @@ public class Main {
             HashMap<Integer, Road> map = new HashMap<>();
             ArrayList<Road> roadList = IOProcess.StringToRoad(roadStr, map);
             ArrayList<Cross> crossList = IOProcess.StringToCross(crossStr,map);
+
+            //对数据进行处理
+            Collections.sort(carList, new Comparator<Car>() {
+                @Override
+                public int compare(Car o1, Car o2) {
+                    return o1.getId() - o2.getId();
+                }
+            });
+
+            Collections.sort(roadList, new Comparator<Road>() {
+                @Override
+                public int compare(Road o1, Road o2) {
+                    return o1.getId() - o2.getId();
+                }
+            });
+
+            Collections.sort(crossList, new Comparator<Cross>() {
+                @Override
+                public int compare(Cross o1, Cross o2) {
+                    return o1.getId() - o2.getId();
+                }
+            });
 
             /****************************************数据预处理完毕****************************************/
 
@@ -129,15 +151,22 @@ public class Main {
             ArrayList<Answer> answerList = BuildAnswer.buildAnswer(carList);
             //ArrayList<Answer> answerList = BuildAnswer.buildAnswer(carList, roadList);
             /********************************************************************************/
+            /****重新规划发车时间的answer，静态预留位置*****/
+            //answerList = LeaveBlankFindPath.leaveBlankFindPath(roadList, crossList, carList);
+
             /**判题器测试*/
-            int time = Judge.judge(carList, crossList, roadList, answerList);
-            System.out.println(time);
+            //int time = Judge2.judge(carList, crossList, roadList, answerList);
+            //System.out.println(time);
             //找环测试
             //ArrayList<Road> testRoadList = new ArrayList<>(roadList.subList(10,50));
             //FindLoop.findLoop(crossList, testRoadList);
             //ArrayList<Road> testRoadList1 = new ArrayList<>(roadList.subList(0,50));
             //FindLoop.findLoop(crossList, testRoadList1);
 
+            /*******************************************************************************/
+            //双判题器方法测试
+            answerList = MainJudge3.buildAnswer(carList, crossList, roadList, answerList);
+            System.out.println("AnswerList的大小为：" + answerList.size());
             /******************************************************************************/
             //DeadLock.reFindRoad(carList, roadList, crossList, new ArrayList<>(answerList.subList(0, 100)));
 

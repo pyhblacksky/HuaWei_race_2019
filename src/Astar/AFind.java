@@ -3,6 +3,7 @@ package Astar;
 import DataStruct.Car;
 import DataStruct.Cross;
 import DataStruct.Road;
+import Util.Util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -159,6 +160,59 @@ public class AFind {
         }
         car.setWeight(weight);//设置当前车的权重
         car.setRoads(res);//更新当前车所走的通路
+    }
+    /**
+     * 重载函数
+     * 起点到终点的寻路，即根据ID
+     * startId：起点
+     * endId：终点
+     * forbidRoadList: 禁止走的路
+     * */
+    public static void AFindPath(ArrayList<Cross> crossList, Car car, Cross start, Cross end, ArrayList<Road> forbidRoadList, int nowRoadId, ArrayList<Road> roadList){
+        AFind find = new AFind(crossList, car);
+
+        ArrayList<Road> forbidList = new ArrayList<>(forbidRoadList);
+        forbidList.add(new Road(Util.getRoadFromId(car.getCarState().getRoadId(), roadList)));
+        if(forbidList != null && forbidList.size() != 0){
+            for(Road road : forbidList){
+                find.forbidRoad(road);
+            }
+        }
+
+        AFind.Node node = find.findPath(new AFind.Node(start),
+                new AFind.Node(end));
+
+        ArrayList<Road> res = new ArrayList<>();
+        //反转链表，因为结果集是反的
+        AFind.Node newHead = null;
+        while(node != null){
+            AFind.Node temp = node.parent;
+            node.parent = newHead;
+            newHead = node;
+            node = temp;
+        }
+        //添加结果集
+        int weight = 0;
+        while(newHead != null){
+            if(newHead.road != null){
+                res.add(newHead.road);
+                weight += newHead.road.getWeight();
+            }
+            newHead = newHead.parent;
+        }
+        car.setWeight(weight);//设置当前车的权重
+        //额外添加当前车走的路
+        ArrayList<Road> nowCarHasRoads = car.getRoads();
+        ArrayList<Road> newRoadList = new ArrayList<>();
+        for(int i = 0; i < nowCarHasRoads.size(); i++){
+            Road tempRoad = nowCarHasRoads.get(i);
+            if(tempRoad.getId() == nowRoadId){
+                break;
+            }
+            newRoadList.add(tempRoad);
+        }
+        newRoadList.addAll(res);
+        car.setRoads(newRoadList);//更新当前车所走的通路
     }
     /**************************************************************************************************************/
     ArrayList<Cross> crossList;

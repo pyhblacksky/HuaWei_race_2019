@@ -48,4 +48,18 @@ public class Util {
         return null;
     }
 
+    //根据两条路获取cross信息
+    public static Cross getCrossFromTwoRoad(int road1, int road2, ArrayList<Cross> crosses){
+        for(Cross cross : crosses){
+            ArrayList<Integer> tempList = new ArrayList<>();
+            tempList.add(cross.getLeftRoad().getId());
+            tempList.add(cross.getDownRoad().getId());
+            tempList.add(cross.getUpRoad().getId());
+            tempList.add(cross.getRightRoad().getId());
+            if(tempList.contains(road1) && tempList.contains(road2)){
+                return cross;
+            }
+        }
+        return null;
+    }
 }
