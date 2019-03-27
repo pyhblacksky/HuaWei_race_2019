@@ -1,5 +1,7 @@
 package DataStruct;
 
+import com.sun.javafx.geom.Matrix3f;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,33 +76,11 @@ public class Road implements Serializable {
         this.end = road.getEnd();
         this.directed = road.getDirected();
         this.weight = road.getWeight();
-        this.matrix_S2E = new ArrayList<>();
-        for (int i = 0; i < lanes; i++) {
-            ArrayList<Car> emptyCarList = new ArrayList<>();
-            for (int j = 0; j < length; j++) {
-                Car emptyCar;
-                if(road.getMatrix_S2E().get(i).get(j) != null && road.getMatrix_S2E().get(i).get(j).getId() != -1) {
-                    emptyCar = new Car(road.getMatrix_S2E().get(i).get(j));
-                } else{
-                    emptyCar = new Car(-1,-1,-1,-1,-1);
-                }
-                emptyCarList.add(emptyCar);
-            }
-            matrix_S2E.add(emptyCarList);
+        if(road.getMatrix_S2E() != null){
+            this.matrix_S2E = new ArrayList<>(road.getMatrix_S2E());
         }
-        this.matrix_E2S = new ArrayList<>();
-        for (int i = 0; i < lanes; i++) {
-            ArrayList<Car> emptyCarList = new ArrayList<>();
-            for (int j = 0; j < length; j++) {
-                Car emptyCar;
-                if(road.getMatrix_E2S().get(i).get(j) != null && road.getMatrix_E2S().get(i).get(j).getId() != -1) {
-                    emptyCar = new Car(road.getMatrix_E2S().get(i).get(j));
-                } else{
-                    emptyCar = new Car(-1,-1,-1,-1,-1);
-                }
-                emptyCarList.add(emptyCar);
-            }
-            matrix_E2S.add(emptyCarList);
+        if(road.getMatrix_E2S() != null){
+            this.matrix_E2S = new ArrayList<>(road.getMatrix_E2S());
         }
     }
 

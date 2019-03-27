@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @Version 1.0
  * @Function:   交叉路口,作为顶点
  */
-public class Cross implements Serializable {
+public class Cross implements Serializable{
 
     //利用Cross的信息，作为顶点
     private int id;

@@ -121,10 +121,10 @@ public class ThroughRule {
     //生成当前路口的道路矩阵
     public static void Road_regular(ArrayList<Road> Roads, Cross cross) {
         //上下左右存路口的道路向量
-        Roads.add(cross.getUpRoad());
-        Roads.add(cross.getRightRoad());
-        Roads.add(cross.getDownRoad());
-        Roads.add(cross.getLeftRoad());
+        Roads.add(new Road(cross.getUpRoad()));
+        Roads.add(new Road(cross.getRightRoad()));
+        Roads.add(new Road(cross.getDownRoad()));
+        Roads.add(new Road(cross.getLeftRoad()));
     }
 
     /******************************************************修改版*******************************************************/

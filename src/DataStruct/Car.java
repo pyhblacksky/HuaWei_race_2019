@@ -53,7 +53,7 @@ public class Car implements Serializable {
         this.id = car.getId();
         this.start = car.getStart();
         this.end = car.getEnd();
-        MaxSpeed = car.getMaxSpeed();
+        this.MaxSpeed = car.getMaxSpeed();
         this.time = car.getTime();
         this.weight = car.getWeight();
         this.realTime = car.getRealTime();

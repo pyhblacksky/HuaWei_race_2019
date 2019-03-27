@@ -8,8 +8,14 @@ import java.io.Serializable;
  * @Version 1.0
  * @Function:   车在当前道路上行驶的状态
  */
-public class CarState implements Serializable {
+public class CarState implements Serializable, Cloneable {
     //序列化
+
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     public int roadId;     //当前车辆行驶的道路id
     public int lane;       //在当前道路上行驶的车道
