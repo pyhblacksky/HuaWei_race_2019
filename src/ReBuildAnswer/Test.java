@@ -2,18 +2,16 @@ package ReBuildAnswer;
 
 /**
  * @Author: pyh
- * @Date: 2019/3/26 15:22
+ * @Date: 2019/3/27 19:29
  * @Version 1.0
  * @Function:
  */
 
 import DataStruct.*;
-import IO_Process.SerializableTest;
-import Judgment.FindLoop;
 import Util.Util;
 import java.util.*;
 
-public class PredictJudge3 {
+public class Test {
 
 
     private static ArrayList<Car> carList;
@@ -23,73 +21,206 @@ public class PredictJudge3 {
     /**
      * 此函数只考虑将路上的车行进完毕
      *
-     * @param forbidRoadIdList  统计应该禁止的路
-     *
      * @return forbidRoadIdList : 禁止路列表
      * @return 返回当前道路上的车是否可以走完
      * */
-    public static boolean judgeNoDeadLock(ArrayList<Integer> forbidRoadIdList){
+    public static boolean judgeNoDeadLock(){
         /**************************数据预处理***************************/
         /**此处必须深拷贝，否则会出现已跑完的现象，需要完全一样的代码副本，实现clone接口**/
-        ArrayList<Object> obj = SerializableTest.DeAllSerialize("AllObject.txt");
+        Road empty = new Road(-1,-1,-1,-1,-1,-1, 0);
+        Road r5018 = new Road(5018, 5, 5, 3, 2, 1, 1);
+        Road r5001 = new Road(5001, 5, 5, 3, 3, 1, 1);
+        Road r5010 = new Road(5010,5,5,3,4,1,1);
+        Road r5000 = new Road(5000,5,5,3,5,1,1);
+        Cross c1 = new Cross(1, r5018, r5001,r5010,r5000);//中心点
+        Cross c2 = new Cross(2, empty, empty, r5018, empty);
+        Cross c3 = new Cross(3, empty, empty, empty, r5001);
+        Cross c4 = new Cross(4, r5010, empty, empty, empty);
+        Cross c5 = new Cross(5, empty, r5000, empty, empty);
+        Car D100 = new Car(100, 5, 3, 5, 1, new CarState(5000, 0, 4));
+        D100.setPath(r5000, r5001);
 
-        roadList = (ArrayList<Road>) obj.get(0);
-        crossList = (ArrayList<Cross>) obj.get(1);
-        ArrayList<Car> inRoadCar = (ArrayList<Car>) obj.get(2);
-        ArrayList<Car> nextCar = (ArrayList<Car>) obj.get(3);
-        /*****************************/
-        //将车中道路重设
-        for(Car car : inRoadCar){
-            ArrayList<Road> getInRoadCarList = car.getRoads();
-            ArrayList<Road> setInRoadCarList = new ArrayList<>();
-            for(Road road : getInRoadCarList){
-                setInRoadCarList.add(Util.getRoadFromId(road.getId(), roadList));
-            }
-            car.setRoads(setInRoadCarList);
-        }
-        for(Car car : nextCar){
-            ArrayList<Road> getInRoadCarList = car.getRoads();
-            ArrayList<Road> setInRoadCarList = new ArrayList<>();
-            for(Road road : getInRoadCarList){
-                setInRoadCarList.add(Util.getRoadFromId(road.getId(), roadList));
-            }
-            car.setRoads(setInRoadCarList);
-        }
-        /*****************************/
-        //Cross也要进行重设
-        for(Cross cross : crossList){
-            Road upRoad = Util.getRoadFromId(cross.getUpRoad().getId(), roadList);
-            if(upRoad != null) {
-                cross.setUpRoad(upRoad);
-            }
-            Road downRoad = Util.getRoadFromId(cross.getDownRoad().getId(), roadList);
-            if(downRoad != null) {
-                cross.setDownRoad(downRoad);
-            }
-            Road leftRoad = Util.getRoadFromId(cross.getLeftRoad().getId(), roadList);
-            if(leftRoad != null) {
-                cross.setLeftRoad(leftRoad);
-            }
-            Road rightRoad = Util.getRoadFromId(cross.getRightRoad().getId(), roadList);
-            if(rightRoad != null) {
-                cross.setRightRoad(rightRoad);
-            }
-        }
-        ///****************************/
-        carList = new ArrayList<>(inRoadCar.size() + nextCar.size());
-        for(Car car : inRoadCar){
-            carList.add(car);
-        }
-        for(Car car : nextCar){
-            carList.add(car);
-        }
+        Car L101 = new Car(101, 5, 2, 5, 1, new CarState(5000, 1, 4));
+        L101.setPath(r5000, r5018);
+
+        Car R102 = new Car(102, 5, 4, 5, 1, new CarState(5000, 2, 4));
+        R102.setPath(r5000, r5010);
+
+        Car L103 = new Car(103, 5, 3, 5, 1, new CarState(5000, 0, 3));
+        L103.setPath(r5000, r5018);
+
+        Car D104 = new Car(104, 5, 3, 5, 1, new CarState(5000, 1, 3));
+        D104.setPath(r5000, r5001);
+
+        Car D105 = new Car(105, 5, 3, 5, 1, new CarState(5000, 2, 3));
+        D105.setPath(r5000, r5001);
+
+        Car D106 = new Car(106, 5, 3, 5, 1, new CarState(5000, 0, 2));
+        D106.setPath(r5000, r5001);
+
+        Car R107 = new Car(107, 5, 4, 5, 1, new CarState(5000, 1, 2));
+        R107.setPath(r5000, r5010);
+
+        Car R108 = new Car(108, 5, 4, 5, 1, new CarState(5000, 2, 2));
+        R108.setPath(r5000, r5010);
+
+        r5000.setMatrix_S2E(D100, 0, 4);
+        r5000.setMatrix_S2E(L101,1,4);
+        r5000.setMatrix_S2E(R102,2,4);
+        r5000.setMatrix_S2E(L103,0,3);
+        r5000.setMatrix_S2E(D104,1,3);
+        r5000.setMatrix_S2E(D105,2,3);
+        r5000.setMatrix_S2E(D106,0,2);
+        r5000.setMatrix_S2E(R107,1,2);
+        r5000.setMatrix_S2E(R108,2,2);
+        Car D200 = new Car(200, 4, 2, 5, 1, new CarState(5010, 0, 4));
+        D200.setPath(r5010, r5018);
+
+        Car D201 = new Car(201, 4, 2, 5, 1, new CarState(5010, 1, 4));
+        D201.setPath(r5010, r5018);
+
+        Car D202 = new Car(202, 4, 2, 5, 1, new CarState(5010, 2, 4));
+        D202.setPath(r5010, r5018);
+
+        Car L203 = new Car(203, 4, 5, 5, 1, new CarState(5010, 0, 3));
+        L203.setPath(r5010, r5000);
+
+        Car L204 = new Car(204, 4, 5, 5, 1, new CarState(5010, 1, 3));
+        L204.setPath(r5010, r5000);
+
+        Car R205 = new Car(205, 4, 3, 5, 1, new CarState(5010, 2, 3));
+        R205.setPath(r5010, r5001);
+
+        Car R206 = new Car(206, 4, 3, 5, 1, new CarState(5010, 0, 3));
+        R206.setPath(r5010, r5001);
+
+        Car D207 = new Car(207, 4, 2, 5, 1, new CarState(5010, 1, 3));
+        D207.setPath(r5010, r5018);
+
+        Car R208 = new Car(208, 4, 3, 5, 1, new CarState(5010, 2, 3));
+        R208.setPath(r5010, r5001);
+
+        r5010.setMatrix_S2E(D200, 0, 4);
+        r5010.setMatrix_S2E(D201,1,4);
+        r5010.setMatrix_S2E(D202,2,4);
+        r5010.setMatrix_S2E(L203,0,3);
+        r5010.setMatrix_S2E(L204,1,3);
+        r5010.setMatrix_S2E(R205,2,3);
+        r5010.setMatrix_S2E(R206,0,2);
+        r5010.setMatrix_S2E(D207,1,2);
+        r5010.setMatrix_S2E(R208,2,2);
+
+        Car D400 = new Car(400, 2, 4, 5, 1, new CarState(5018, 0, 4));
+        D400.setPath(r5018, r5010);
+
+        Car D401 = new Car(401, 2, 4, 5, 1, new CarState(5018, 1, 4));
+        D401.setPath(r5018, r5010);
+
+        Car L402 = new Car(402, 2, 3, 5, 1, new CarState(5018, 2, 4));
+        L402.setPath(r5018, r5001);
+
+        Car L403 = new Car(403, 2, 3, 5, 1, new CarState(5018, 0, 3));
+        L403.setPath(r5018, r5001);
+
+        Car L404 = new Car(404, 2, 3, 5, 1, new CarState(5018, 1, 3));
+        L404.setPath(r5018, r5001);
+
+        Car R405 = new Car(405, 2, 5, 5, 1, new CarState(5018, 2, 3));
+        R405.setPath(r5018, r5000);
+
+        Car R406 = new Car(406, 2, 5, 5, 1, new CarState(5018, 0, 2));
+        R406.setPath(r5018, r5000);
+
+        Car D407 = new Car(407, 2, 4, 5, 1, new CarState(5018, 1, 2));
+        D407.setPath(r5018, r5010);
+
+        Car D408 = new Car(408, 2, 4, 5, 1, new CarState(5018, 2, 2));
+        D408.setPath(r5018, r5010);
+
+        r5018.setMatrix_S2E(D400, 0, 4);
+        r5018.setMatrix_S2E(D401,1,4);
+        r5018.setMatrix_S2E(L402,2,4);
+        r5018.setMatrix_S2E(L403,0,3);
+        r5018.setMatrix_S2E(L404,1,3);
+        r5018.setMatrix_S2E(R405,2,3);
+        r5018.setMatrix_S2E(R406,0,2);
+        r5018.setMatrix_S2E(D407,1,2);
+        r5018.setMatrix_S2E(D408,2,2);
+
+        Car L300 = new Car(300, 3, 4, 5, 1, new CarState(5001, 0, 4));
+        L300.setPath(r5001, r5010);
+
+        Car L301 = new Car(301, 3, 4, 5, 1, new CarState(5001, 1, 4));
+        L301.setPath(r5001, r5010);
+
+        Car R302 = new Car(302, 3, 2, 5, 1, new CarState(5001, 2, 4));
+        R302.setPath(r5001, r5018);
+
+        Car R303 = new Car(303, 3, 2, 5, 1, new CarState(5001, 0, 3));
+        R303.setPath(r5001, r5018);
+
+        Car D304 = new Car(304, 3, 5, 5, 1, new CarState(5001, 1, 3));
+        D304.setPath(r5001, r5000);
+
+        Car R305 = new Car(305, 3, 2, 5, 1, new CarState(5001, 2, 3));
+        R305.setPath(r5001, r5018);
+
+        Car R306 = new Car(306, 3, 2, 5, 1, new CarState(5001, 0, 2));
+        R306.setPath(r5001, r5018);
+
+        Car L307 = new Car(307, 3, 4, 5, 1, new CarState(5001, 1, 2));
+        L307.setPath(r5001, r5010);
+
+        Car D308 = new Car(308, 3, 5, 5, 1, new CarState(5001, 2, 2));
+        D308.setPath(r5001, r5000);
+
+        r5001.setMatrix_S2E(L300,0,4);
+        r5001.setMatrix_S2E(L301,1,4);
+        r5001.setMatrix_S2E(R302,2,4);
+        r5001.setMatrix_S2E(R303,0,3);
+        r5001.setMatrix_S2E(D304,1,3);
+        r5001.setMatrix_S2E(R305,2,3);
+        r5001.setMatrix_S2E(R306,0,2);
+        r5001.setMatrix_S2E(L307,1,2);
+        r5001.setMatrix_S2E(D308,2,2);
 
 
+        roadList = new ArrayList<>();
+        roadList.add(r5000);
+        roadList.add(r5001);
+        roadList.add(r5010);
+        roadList.add(r5018);
+
+        carList = new ArrayList<>();
+        carList.add(D100);carList.add(L101);carList.add(R102);
+        carList.add(L103);carList.add(D104);carList.add(D105);
+        carList.add(D106);carList.add(R107);carList.add(R108);
+
+        carList.add(D200);carList.add(D201);carList.add(D202);
+        carList.add(L203);carList.add(L204);carList.add(R205);
+        carList.add(R206);carList.add(D207);carList.add(R208);
+
+        carList.add(L300);carList.add(L301);carList.add(R302);
+        carList.add(R303);carList.add(D304);carList.add(R305);
+        carList.add(R306);carList.add(L307);carList.add(D308);
+
+        carList.add(L402);carList.add(D401);carList.add(D400);
+        carList.add(R405);carList.add(L404);carList.add(L403);
+        carList.add(D408);carList.add(D407);carList.add(R406);
+
+        crossList = new ArrayList<>();
+        crossList.add(c1);
+        crossList.add(c2);
+        crossList.add(c3);
+        crossList.add(c4);
+        crossList.add(c5);
+
+        rebuildState();
         /**************************************************************/
         /* 按时间片处理 */
-        int Time = 1;//从时间1开始
+        int Time = 0;//从时间1开始
         boolean forceJump = false;// 是否是强制跳出
-        driveCarInGarage(nextCar);//发出指定的车,剩下没发出的不管
+        //driveCarInGarage(nextCar);//发出指定的车,剩下没发出的不管
         for(; ;Time++) {
             /*****测试——到达终点的车****/
             ArrayList<Car> endCar = getInEndCar();
@@ -124,39 +255,61 @@ public class PredictJudge3 {
                 //按道路ID升序进行调度，只调度该道路出路口的方向
                 for(Cross cross : crossList){
                     //获取该路口的道路优先级
-                    ArrayList<Road> priorityRoad = ThroughRule.RoadPriority(cross);//按照道路序号升序
-                    while(isCrossAllRoadCarWait(cross, priorityRoad)) {
-                        for (Road road : priorityRoad) {
-                            driveCrossCar(road, cross);
+                    if(cross.getId() == 1) {
+                        ArrayList<Road> priorityRoad = ThroughRule.RoadPriority(cross);//按照道路序号升序
+                        System.out.println("路口调度顺序：");
+                        while (isCrossAllRoadCarWait(cross, priorityRoad)) {
+                            for (Road road : priorityRoad) {
+                                //System.out.print(road.getId() + " ");
+                                driveCrossCar(road, cross);
+                            }
                         }
                     }
                 }
             }
 
-            /******************************************************************/
-            if(Time > 1) {
-                //此时寻找满路，看是否可以形成环
-                ArrayList<Road> fullRoads = countFullRoad();//获取满的路
-                Set<List<Integer>> loop = FindLoop.findLoop(crossList, fullRoads);//根据满的路找环
-                //如果有环，则我认为是失败的，否则，是成功的
-                if (loop.size() > 0) {
-                    //记录成环路
-                    for (List<Integer> tempList : loop) {
-                        forbidRoadIdList.addAll(tempList);
-                    }
-                    return false;//有环，失败
-                } else {
-                    return true;//无环，成功
-                }
-            }
-            /****************************************************************/
-
-            /* 车库无车，道路无车，则运行完毕*/
+            /* 道路无车，则运行完毕*/
             if(isAllRoadEmpty()){
                 break;
             }
         }
         return true;
+    }
+
+    public static void main(String[] args){
+        judgeNoDeadLock();
+    }
+
+    /**
+     * 状态重设
+     * */
+    private static void rebuildState(){
+        for(Car car : carList){
+            ArrayList<Road> getInRoadCarList = car.getRoads();
+            ArrayList<Road> setInRoadCarList = new ArrayList<>();
+            for(Road road : getInRoadCarList){
+                setInRoadCarList.add(Util.getRoadFromId(road.getId(), roadList));
+            }
+            car.setRoads(setInRoadCarList);
+        }
+        for(Cross cross : crossList){
+            Road upRoad = Util.getRoadFromId(cross.getUpRoad().getId(), roadList);
+            if(upRoad != null) {
+                cross.setUpRoad(upRoad);
+            }
+            Road downRoad = Util.getRoadFromId(cross.getDownRoad().getId(), roadList);
+            if(downRoad != null) {
+                cross.setDownRoad(downRoad);
+            }
+            Road leftRoad = Util.getRoadFromId(cross.getLeftRoad().getId(), roadList);
+            if(leftRoad != null) {
+                cross.setLeftRoad(leftRoad);
+            }
+            Road rightRoad = Util.getRoadFromId(cross.getRightRoad().getId(), roadList);
+            if(rightRoad != null) {
+                cross.setRightRoad(rightRoad);
+            }
+        }
     }
 
     /**
@@ -282,6 +435,14 @@ public class PredictJudge3 {
                 //对当前道路的每个车道进行遍历扫描
                 for(int i = road.getLength()-1; i >= 0; i--) {
                     for (int lane = 0; lane < road.getLanes(); lane++) {
+                        //int position = road.get_Topcar_location_S2E(lane + 1);//获取当前位置的车的距离
+                        //if (position == -1) {//说明是空车道，下一条车道
+                        //    if (isRoadEmpty(road, 1)) {//此时路为空，跳出
+                        //        changeRoad = true;
+                        //        break;
+                        //    }
+                        //    continue;
+                        //}
 
                         /*此时路上没wait的车，跳出*/
                         if (!isRoadHasCarWait(road, 1)) {
@@ -289,23 +450,25 @@ public class PredictJudge3 {
                             break;
                         }
 
-                        Car nowCar = road.getMatrix_S2E().get(lane).get(i);//获取当前点的车，不一定是头车
-                        if (nowCar == null || nowCar.getId() == -1) {//不存在头车，说明此时车道为空
+                        Car topCar = road.getMatrix_S2E().get(lane).get(i);//获取当前点的车，不一定是头车
+                        if (topCar == null || topCar.getId() == -1) {//不存在头车，说明此时车道为空
                             continue;//直接下一车道
                         }
 
                         //如果头车已经行驶过，本车道正常车辆行驶
-                        int topCarLocation = road.get_Topcar_location_S2E(lane+1);
-                        Car topCar = road.getMatrix_S2E().get(lane).get(topCarLocation);
                         if (!topCar.getCarState().isWait()) {
                             //正常行驶，将本车道的车行驶完
-                            Car normalCar = road.getMatrix_S2E().get(lane).get(i);
-                            if (normalCar.getId() != -1 && normalCar.getCarState().isWait()) {
-                                deleteRoadCar(normalCar, road, 1);//删除这条路上的该车
-                                ThroughRule.Untopcar_Go_distance(cross, lane, road, normalCar);//设置距离
-                                updateRoad(normalCar, road, normalCar.getCarState().getLane(), normalCar.getCarState().getPosition(), 1);
-                                normalCar.getCarState().setRunning(false);
-                                normalCar.getCarState().setWait(false);
+
+                            int normalPosition = road.getWaitCarlocation_S2E(lane + 1);
+                            if (normalPosition != -1) {
+                                Car normalCar = road.getMatrix_S2E().get(lane).get(normalPosition);
+                                if (normalCar.getCarState().isWait()) {
+                                    deleteRoadCar(normalCar, road, 1);//删除这条路上的该车
+                                    ThroughRule.Untopcar_Go_distance(cross, lane, road, normalCar);//设置距离
+                                    updateRoad(normalCar, road, normalCar.getCarState().getLane(), normalCar.getCarState().getPosition(), 1);
+                                    normalCar.getCarState().setRunning(false);
+                                    normalCar.getCarState().setWait(false);
+                                }
                             }
 
                             if (isThisRoadCarComplete(road, 1) && !isRoadHasCarWait(road, 1)) {//当前路上的车已经全部完成，跳出
@@ -315,7 +478,7 @@ public class PredictJudge3 {
                             continue;
                         }
 
-                        boolean isUpdate = ThroughRule.Go_control_priority(nowCar, cross, roadList, crossList);//是否可以更新道路矩阵
+                        boolean isUpdate = ThroughRule.Go_control_priority(topCar, cross, roadList, crossList);//是否可以更新道路矩阵
                         if (isUpdate) {   //可以更新矩阵
                             //反复调用
                             int pass_or_not = ThroughRule.Pass_or_Not(cross, lane, roadList, crossList);
@@ -324,35 +487,37 @@ public class PredictJudge3 {
                             //过路口
                             if (real_distance == -5 || pass_or_not == 0) {
                                 //被堵住，在当前道路可行最大距离
-                                deleteRoadCar(nowCar, road, 1);
-                                nowCar.getCarState().setPosition(road.getLength() - 1);
-                                updateRoad(nowCar, road, nowCar.getCarState().getLane(), road.getLength() - 1, 1);
-                                nowCar.getCarState().setRunning(false);
-                                nowCar.getCarState().setWait(false);//表示完成过路口这个动作
+                                deleteRoadCar(topCar, road, 1);
+                                topCar.getCarState().setPosition(road.getLength() - 1);
+                                updateRoad(topCar, road, topCar.getCarState().getLane(), road.getLength() - 1, 1);
+                                topCar.getCarState().setRunning(false);
+                                topCar.getCarState().setWait(false);//表示完成过路口这个动作
                                 continue;
                             }
                             if (real_distance == -2) {
                                 //到终点
-                                nowCar.getCarState().setEnd(true);
-                                deleteRoadCar(nowCar, road, 1);
+                                topCar.getCarState().setEnd(true);
+                                deleteRoadCar(topCar, road, 1);
                                 continue;
                             }
 
-                            deleteRoadCar(nowCar, road, 1);//删除这条路上的该车
-                            Road nextRoad = getNextRoad(nowCar);
-                            nowCar.getCarState().setRoadId(nextRoad.getId());//更新车的下一条路的状态
+
+                            deleteRoadCar(topCar, road, 1);//删除这条路上的该车
+                            Road nextRoad = getNextRoad(topCar);
+                            topCar.getCarState().setRoadId(nextRoad.getId());//更新车的下一条路的状态
                             if (nextRoad.getEnd() == cross.getId()) {//以下一条路的方向判断更新矩阵
-                                nowCar.getCarState().setLane(putLane(nextRoad, -1));
-                                nowCar.getCarState().setPosition(real_distance - 1);//放置的是矩阵对应位置
-                                updateRoad(nowCar, nextRoad, nowCar.getCarState().getLane(), nowCar.getCarState().getPosition(), -1);//放入的方向是否正确？
+                                topCar.getCarState().setLane(putLane(nextRoad, -1));
+                                topCar.getCarState().setPosition(real_distance - 1);//放置的是矩阵对应位置
+                                updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), -1);//放入的方向是否正确？
                             } else {
-                                nowCar.getCarState().setLane(putLane(nextRoad, 1));
-                                nowCar.getCarState().setPosition(real_distance - 1);//放置的是矩阵对应位置
-                                updateRoad(nowCar, nextRoad, nowCar.getCarState().getLane(), nowCar.getCarState().getPosition(), 1);//放入的方向是否正确？
+                                topCar.getCarState().setLane(putLane(nextRoad, 1));
+                                topCar.getCarState().setPosition(real_distance - 1);//放置的是矩阵对应位置
+                                updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), 1);//放入的方向是否正确？
                             }
                             //更新状态
-                            nowCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
-                            nowCar.getCarState().setWait(false);//表示已经通过路口
+                            topCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
+                            topCar.getCarState().setWait(false);//表示已经通过路口
+                            System.out.print(topCar.getId() + " ");
                         } else {
                             //不能更新矩阵，优先级转让,切换道路
                             jumpOut = true;
@@ -386,6 +551,14 @@ public class PredictJudge3 {
                 //对当前道路的每个车道进行遍历扫描
                 for(int i = road.getLength() - 1; i >= 0; i--) {
                     for (int lane = 0; lane < road.getLanes(); lane++) {
+                        //int position = road.get_Topcar_location_E2S(lane + 1);//获取当前位置的车的距离
+                        //if (position == -1) {//说明是空车道，跳过
+                        //    if (isRoadEmpty(road, -1)) {//此时路为空，跳出
+                        //        changeRoad = true;
+                        //        break;
+                        //    }
+                        //    continue;
+                        //}
 
                         /*此时路上没wait的车，跳出*/
                         if (!isRoadHasCarWait(road, -1)) {
@@ -393,23 +566,24 @@ public class PredictJudge3 {
                             break;
                         }
 
-                        Car nowCar = road.getMatrix_E2S().get(lane).get(i);//获取当前点的车，不一定是头车
-                        if (nowCar == null || nowCar.getId() == -1) {//不存在头车，说明此时车道为空
+                        Car topCar = road.getMatrix_E2S().get(lane).get(i);//获取当前点的车，不一定是头车
+                        if (topCar == null || topCar.getId() == -1) {//不存在头车，说明此时车道为空
                             continue;//直接下一车道
                         }
 
-                        int topCarLocation = road.get_Topcar_location_E2S(lane+1);
-                        Car topCar = road.getMatrix_E2S().get(lane).get(topCarLocation);
                         //如果头车已经行驶过，本车道正常车辆行驶
                         if (!topCar.getCarState().isWait()) {
                             //正常行驶，将本车道的车行驶完
-                            Car normalCar = road.getMatrix_E2S().get(lane).get(i);
-                            if (normalCar.getId() != -1 && normalCar.getCarState().isWait()) {
-                                deleteRoadCar(normalCar, road, -1);//删除这条路上的该车
-                                ThroughRule.Untopcar_Go_distance(cross, lane, road, normalCar);//设置距离
-                                updateRoad(normalCar, road, normalCar.getCarState().getLane(), normalCar.getCarState().getPosition(), -1);
-                                normalCar.getCarState().setRunning(false);
-                                normalCar.getCarState().setWait(false);
+                            int normalPosition = road.getWaitCarlocation_E2S(lane + 1);
+                            if (normalPosition != -1) {
+                                Car normalCar = road.getMatrix_E2S().get(lane).get(normalPosition);
+                                if (normalCar.getCarState().isWait()) {
+                                    deleteRoadCar(normalCar, road, -1);//删除这条路上的该车
+                                    ThroughRule.Untopcar_Go_distance(cross, lane, road, normalCar);//设置距离
+                                    updateRoad(normalCar, road, normalCar.getCarState().getLane(), normalCar.getCarState().getPosition(), -1);
+                                    normalCar.getCarState().setRunning(false);
+                                    normalCar.getCarState().setWait(false);
+                                }
                             }
 
                             if (isThisRoadCarComplete(road, -1) && !isRoadHasCarWait(road, -1)) {//当前路上的车已经全部完成，跳出
@@ -419,7 +593,7 @@ public class PredictJudge3 {
                             continue;
                         }
 
-                        boolean isUpdate = ThroughRule.Go_control_priority(nowCar, cross, roadList, crossList);//是否可以更新道路矩阵
+                        boolean isUpdate = ThroughRule.Go_control_priority(topCar, cross, roadList, crossList);//是否可以更新道路矩阵
                         if (isUpdate) {   //可以更新矩阵
                             //反复调用
                             int pass_or_not = ThroughRule.Pass_or_Not(cross, lane, roadList, crossList);
@@ -428,36 +602,37 @@ public class PredictJudge3 {
                             //过路口
                             if (real_distance == -5 || pass_or_not == 0) {//TODO 存在问题
                                 //被堵住，在当前道路可行最大距离
-                                deleteRoadCar(nowCar, road, -1);
-                                nowCar.getCarState().setPosition(road.getLength() - 1);
-                                updateRoad(nowCar, road, nowCar.getCarState().getLane(), road.getLength() - 1, -1);//顶到头
-                                nowCar.getCarState().setRunning(false);
-                                nowCar.getCarState().setWait(false);//表示完成过路口这个动作
+                                deleteRoadCar(topCar, road, -1);
+                                topCar.getCarState().setPosition(road.getLength() - 1);
+                                updateRoad(topCar, road, topCar.getCarState().getLane(), road.getLength() - 1, -1);//顶到头
+                                topCar.getCarState().setRunning(false);
+                                topCar.getCarState().setWait(false);//表示完成过路口这个动作
                                 continue;
                             }
                             if (real_distance == -2) {
                                 //到终点
-                                nowCar.getCarState().setEnd(true);
-                                deleteRoadCar(nowCar, road, -1);
+                                topCar.getCarState().setEnd(true);
+                                deleteRoadCar(topCar, road, -1);
                                 continue;
                             }
 
 
-                            deleteRoadCar(nowCar, road, -1);//删除这条路上的该车
-                            Road nextRoad = getNextRoad(nowCar);
-                            nowCar.getCarState().setRoadId(nextRoad.getId());//更新车的下一条路的状态
+                            deleteRoadCar(topCar, road, -1);//删除这条路上的该车
+                            Road nextRoad = getNextRoad(topCar);
+                            topCar.getCarState().setRoadId(nextRoad.getId());//更新车的下一条路的状态
                             if (nextRoad.getEnd() == cross.getId()) {//以下一条路的方向判断更新矩阵
-                                nowCar.getCarState().setLane(putLane(nextRoad, -1));
-                                nowCar.getCarState().setPosition(real_distance - 1);//放置的是矩阵对应位置
-                                updateRoad(nowCar, nextRoad, nowCar.getCarState().getLane(), nowCar.getCarState().getPosition(), -1);//放入的方向是否正确？
+                                topCar.getCarState().setLane(putLane(nextRoad, -1));
+                                topCar.getCarState().setPosition(real_distance - 1);//放置的是矩阵对应位置
+                                updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), -1);//放入的方向是否正确？
                             } else {
-                                nowCar.getCarState().setLane(putLane(nextRoad, 1));
-                                nowCar.getCarState().setPosition(real_distance - 1);//放置的是矩阵对应位置
-                                updateRoad(nowCar, nextRoad, nowCar.getCarState().getLane(), nowCar.getCarState().getPosition(), 1);//放入的方向是否正确？
+                                topCar.getCarState().setLane(putLane(nextRoad, 1));
+                                topCar.getCarState().setPosition(real_distance - 1);//放置的是矩阵对应位置
+                                updateRoad(topCar, nextRoad, topCar.getCarState().getLane(), topCar.getCarState().getPosition(), 1);//放入的方向是否正确？
                             }
                             //更新状态
-                            nowCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
-                            nowCar.getCarState().setWait(false);//已经通过路口
+                            topCar.getCarState().setRunning(false);//设置车辆状态信息， 已经行进完成
+                            topCar.getCarState().setWait(false);//已经通过路口
+                            System.out.print(topCar.getId() + " ");
                         } else {
                             //不能更新矩阵，优先级转让,切换道路
                             jumpOut = true;
@@ -1041,60 +1216,52 @@ public class PredictJudge3 {
     /**
      * 计算已满道路， 通过ArrayList传出
      * */
-    private static ArrayList<Road> countFullRoad() {
-        ArrayList<Road> res = new ArrayList<>();//保存已满路
-        ArrayList<ArrayList<Car>> MatrixTemp;
-        for (Road road : roadList) {
-            boolean flag = false;//标记量，是否跳出
-            if (road.getDirected() == 1) {//说明是双向路
-                //其中一个矩阵满则认为路满，这里相当于放大了条件
-                MatrixTemp = road.getMatrix_S2E();
-                for (ArrayList<Car> lanes : MatrixTemp) {
-                    for (Car car : lanes) {
-                        if (car.getId() == -1) {//说明有空位，直接下一条路
-                            flag = true;//说明路不满，跳出
-                            break;
-                        }
+    private static ArrayList<Road> countFullRoad(){
+        ArrayList<Road> res = new ArrayList<>();
+        for(Road road : roadList){
+            //所有矩阵都有S2E矩阵
+            ArrayList<ArrayList<Car>> Matrix = road.getMatrix_S2E();
+            boolean flag = false;//跳出多层循环
+            boolean canAdd = true;
+            for(ArrayList<Car> lanes : Matrix){
+                for(Car car : lanes){
+                    if(car.getId() == -1){//说明有空位
+                        flag = true;
+                        break;
                     }
-                    if (flag) { break; }
                 }
-
-                if (!flag) { //此时说明路满，直接遍历下一条路，否则继续遍历另外一个矩阵
-                    res.add(road);
-                    continue;
+                if(flag){
+                    canAdd = false;
+                    break;
                 }
-                flag = false;//重新设置标记量
-                //E2S矩阵
-                MatrixTemp = road.getMatrix_E2S();
-                for (ArrayList<Car> lanes : MatrixTemp) {
-                    for (Car car : lanes) {
-                        if (car.getId() == -1) {//说明有空位，直接下一条路
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if (flag) { break; }
-                }
-
-                if (flag) { continue; }
-                res.add(road);//此时说明已满，count+1
-            } else {
-                //S2E矩阵
-                MatrixTemp = road.getMatrix_S2E();
-                for (ArrayList<Car> lanes : MatrixTemp) {
-                    for (Car car : lanes) {
-                        if (car.getId() == -1) {//说明有空位，直接下一条路
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if (flag) { break; }
-                }
-
-                if (flag) { continue; }
-                res.add(road);//此时说明已满，count+1
             }
+
+            if(canAdd){res.add(road);}//添加进结果集
+
+            /**************************************************************/
+            if(road.getDirected() == 1 && !res.contains(road)){
+                //此时遍历E2S矩阵
+                Matrix = road.getMatrix_E2S();
+                flag = false;//跳出多层循环
+                canAdd = true;
+                for(ArrayList<Car> lanes : Matrix){
+                    for(Car car : lanes){
+                        if(car.getId() == -1){
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if(flag){
+                        canAdd = false;
+                        break;
+                    }
+                }
+
+                if(canAdd){res.add(road);}
+            }
+
         }
+
         return res;
     }
 

@@ -150,4 +150,11 @@ public class Car implements Serializable {
         this.forbidRoads.add(road);
     }
 
+
+    public void setPath(Road r1, Road r2){
+        ArrayList<Road> temp = new ArrayList<>();
+        temp.add(r1);
+        temp.add(r2);
+        this.setRoads(temp);
+    }
 }

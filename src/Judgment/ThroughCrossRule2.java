@@ -225,7 +225,7 @@ public class ThroughCrossRule2 {
      *
     * */
     public static boolean Go_control_priority(Car car_Thisroad, Cross cross, ArrayList<Road> AllRoads, ArrayList<Cross> AllCross) {
-        //
+        //int lane;
         int Direction_me;//0——直行 1——左转   2——右转   -1——空车道    -2 到终点   -3——空路
         int[] num0 = { 3,0,1,2 }; //右面，前一个标号
         int[] num1 = { 1,2,3,0 }; //左面，下一个标号
@@ -266,7 +266,7 @@ public class ThroughCrossRule2 {
             if (Roads.get(vector_location0).getStart() == cross.getId()){//道路方向向外
                 if (Roads.get(vector_location0).getDirected() == 1){//并且为双向路
                     Matrix_temp = Roads.get(vector_location0).getMatrix_E2S();
-                    loc_temp = Roads.get(vector_location0).get_Topcar_location_E2S(1);
+                    //loc_temp = Roads.get(vector_location0).get_Topcar_location_E2S(lane );
                 } else{//道路向外单向道
                     Matrix_temp = null;
                     loc_temp = -3;
@@ -276,15 +276,33 @@ public class ThroughCrossRule2 {
                 if(Matrix_temp == null){
                     loc_temp = -3;
                 }//无路
-                else
-                    loc_temp = Roads.get(vector_location0).get_Topcar_location_S2E(1);
+                //else
+                //loc_temp = Roads.get(vector_location0).get_Topcar_location_S2E(lane );
             }
+
+            int laneTemp = 0;
+            loc_temp = Roads.get(vector_location0).getLength()-1;
+            boolean jumpOut = false;
+            for(int i = Roads.get(vector_location0).getLength()-1; i >= 0; i--) {
+                for (int lane = 0; lane < Roads.get(vector_location0).getLanes(); lane++) {
+                    if(Matrix_temp.get(lane).get(i).getId() != -1){
+                        laneTemp = lane;
+                        loc_temp = i;
+                        jumpOut = true;
+                        break;
+                    }
+                }
+                if(jumpOut){
+                    break;
+                }
+            }
+
 
             Car car_r = new Car(-1,-1,-1,-1,-1);
             if (loc_temp == -1)  Direction_r = -1;//空车道
             else if(loc_temp == -3) Direction_r = -3;//空路
             else {
-                car_r = Matrix_temp.get(0).get(loc_temp);
+                car_r = Matrix_temp.get(laneTemp).get(loc_temp);
                 Direction_r = JudgeDirection(car_r, AllRoads, AllCross);
             }
 
@@ -309,7 +327,6 @@ public class ThroughCrossRule2 {
             if (Roads.get(vector_location1).getStart() == cross.getId()){//道路方向向外
                 if (Roads.get(vector_location1).getDirected() == 1){//为双向路
                     Matrix_temp = Roads.get(vector_location1).getMatrix_E2S();
-                    loc_temp = Roads.get(vector_location1).get_Topcar_location_E2S(1);
                 } else{//道路向外单向道
                     Matrix_temp = null;
                     loc_temp = -3;
@@ -319,15 +336,30 @@ public class ThroughCrossRule2 {
                 if(Matrix_temp == null){
                     loc_temp = -3;
                 }
-                else
-                    loc_temp = Roads.get(vector_location1).get_Topcar_location_S2E(1);
+            }
+
+            int laneTemp = 0;
+            loc_temp = Roads.get(vector_location1).getLength()-1;
+            boolean jumpOut = false;
+            for(int i = Roads.get(vector_location1).getLength()-1; i >= 0; i--) {
+                for (int lane = 0; lane < Roads.get(vector_location1).getLanes(); lane++) {
+                    if(Matrix_temp.get(lane).get(i).getId() != -1){
+                        laneTemp = lane;
+                        loc_temp = i;
+                        jumpOut = true;
+                        break;
+                    }
+                }
+                if(jumpOut){
+                    break;
+                }
             }
 
             Car car_l = new Car(-1,-1,-1,-1,-1);
             if (loc_temp == -1)  Direction_l = -1;
             else if(loc_temp == -3) Direction_l = -3;
             else {
-                car_l = Matrix_temp.get(0).get(loc_temp);
+                car_l = Matrix_temp.get(laneTemp).get(loc_temp);
                 Direction_l = JudgeDirection(car_l, AllRoads, AllCross);
             }
 
@@ -344,7 +376,6 @@ public class ThroughCrossRule2 {
                 if (Roads.get(vector_location2).getStart() == cross.getId()){//道路方向向外
                     if (Roads.get(vector_location2).getDirected() == 1){//为双向路
                         Matrix_temp = Roads.get(vector_location2).getMatrix_E2S();
-                        loc_temp = Roads.get(vector_location2).get_Topcar_location_E2S(1);
                     } else{//道路向外单向道
                         Matrix_temp = null;
                         loc_temp = -3;
@@ -352,15 +383,31 @@ public class ThroughCrossRule2 {
                 } else {//道路方向向内
                     Matrix_temp = Roads.get(vector_location2).getMatrix_S2E();
                     if(Matrix_temp == null){loc_temp = -3;}
-                    else
-                        loc_temp = Roads.get(vector_location2).get_Topcar_location_S2E(1);
+
+                }
+
+                laneTemp = 0;
+                loc_temp = Roads.get(vector_location2).getLength()-1;
+                jumpOut = false;
+                for(int i = Roads.get(vector_location2).getLength()-1; i >= 0; i--) {
+                    for (int lane = 0; lane < Roads.get(vector_location2).getLanes(); lane++) {
+                        if(Matrix_temp.get(lane).get(i).getId() != -1){
+                            laneTemp = lane;
+                            loc_temp = i;
+                            jumpOut = true;
+                            break;
+                        }
+                    }
+                    if(jumpOut){
+                        break;
+                    }
                 }
 
                 Car car_op = new Car(-1,-1,-1,-1,-1);
                 if (loc_temp == -1)  Direction_op = -1;
                 else  if(loc_temp == -3) Direction_op = -3;
                 else {
-                    car_op = Matrix_temp.get(0).get(loc_temp);
+                    car_op = Matrix_temp.get(laneTemp).get(loc_temp);
                     Direction_op = JudgeDirection(car_op, AllRoads, AllCross);
                 }
 
@@ -585,7 +632,7 @@ public class ThroughCrossRule2 {
 
         int Car_thisroad_V = Math.min(Thisroad.getMaxSpeed(), Untopcar.getMaxSpeed());
 
-       
+        Untopcar.getCarState().setPosition(Math.min(car2car_distance, Car_thisroad_V)+ Untopcar.getCarState().getPosition());
 
         return (Math.min(car2car_distance, Car_thisroad_V));
     }
