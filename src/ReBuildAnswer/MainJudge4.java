@@ -55,9 +55,9 @@ public class MainJudge4 {
         rebuildState();
         for(; ;Time++) {
             /*****测试——到达终点的车****/
-            //ArrayList<Car> endCar = getInEndCar();
+            ArrayList<Car> endCar = getInEndCar();
             //System.out.println(endCar);
-            //ArrayList<Car> roadHasCar = getInRoadCar();
+            ArrayList<Car> roadHasCar = getInRoadCar();
             /******测试——计算已满路******/
             //ArrayList<Road> fullRoad = countFullRoad();//计算已满路
             /*****************************/
@@ -99,7 +99,7 @@ public class MainJudge4 {
             }
 
             //如果车流量数小于800，则发车
-            int limit = 900;
+            int limit = 1000;
             if(getInRoadCar().size() < limit){
                 /*发车*/
                 ArrayList<Car> canRunCar = getInGarageCar();//getInGarageCar()还在车库中的车, limitCount 为限制发车数，当前只能发多少辆车
@@ -129,20 +129,9 @@ public class MainJudge4 {
                     if (forbidRoad.size() >= 3) {
                         //调整当前道路上的车，改变其接下来的道路
                         //回溯状态
-                        reFindCarRoads(getInRoadCar(), forbidRoad);
+                        reFindCarRoads(getInRoadCar(), forbidRoad, finalAnswer);
                     }
                 }
-
-                //ArrayList<Integer> forbidRoadIdList = new ArrayList<>();//禁止路列表
-                //if(!PredictJudge4.judgeNoDeadLock(tempRoadList, tempCarList, tempCrossList, forbidRoadIdList)){
-                //    //此时说明下个单位可能会产生环
-                //    ArrayList<Road> forbidRoad = new ArrayList<>();
-                //    for (int i : forbidRoadIdList) {
-                //        forbidRoad.add(Util.getRoadFromId(i, roadList));
-                //    }
-                //    //调整当前道路上的车，改变其接下来的道路
-                //    reFindCarRoads(getInRoadCar(), forbidRoad);
-                //}
             }
 
 
@@ -287,7 +276,7 @@ public class MainJudge4 {
     /***
      * 重新寻路
      * */
-    private static void reFindCarRoads(ArrayList<Car> inRoadCar, ArrayList<Road> forbidRoad){
+    private static void reFindCarRoads(ArrayList<Car> inRoadCar, ArrayList<Road> forbidRoad, ArrayList<Answer> finalAnswer){
         for(Car car : inRoadCar){
             //车包含禁止路才进行下一步
             int nowRoadId = car.getCarState().getRoadId();//改车当前道路的id
@@ -316,8 +305,62 @@ public class MainJudge4 {
                     if(nowCross == null || finishCross == null){
                         continue;
                     }
+
+                    /********************记录之前的路********************/
+                    //ArrayList<Road> beforeRoads = new ArrayList<>();//
+                    ////保存之前的路
+                    //for(Road passRoad : car.getRoads()){
+                    //    beforeRoads.add(new Road(passRoad));
+                    //    if(passRoad.getId() == nowRoadId){
+                    //        break;
+                    //    }
+                    //}
+                    //
+                    ////添加答案
+                    //for(Answer answer : finalAnswer){
+                    //    if(answer.getCarId() == car.getId()){
+                    //        answer.setRoads(beforeRoads);
+                    //        break;
+                    //    }
+                    //}
+                    /********************************************/
                     //重新寻路
-                    AFind.AFindPath(crossList, car, nowCross, finishCross, forbidRoad, nowRoadId, roadList);
+                    ArrayList<Road> olderRoads = new ArrayList<>(car.getRoads());//保存之前的路
+
+                    AFind.AFindPath(crossList, car, nowCross, finishCross, forbidRoad, nowRoadId, roadList);//其中road是禁止路
+                    /*************************更新答案****************************/
+                    //if(car.getRoads() == null || car.getRoads().size() == 0){//重新寻路为空，复原
+                    //    car.setRoads(olderRoads);
+                    //    for(Answer answer : finalAnswer){
+                    //        if(answer.getCarId() == car.getId()){
+                    //            answer.setRoads(olderRoads);
+                    //            break;
+                    //        }
+                    //    }
+                    //    rebuildState();
+                    //} else{
+                    //    for(Answer answer : finalAnswer){
+                    //        if(answer.getCarId() == car.getId()){
+                    //            ArrayList<Road> temp = answer.getRoads();
+                    //            temp.addAll(car.getRoads());
+                    //            answer.setRoads(temp);//添加寻完路后的答案
+                    //            //answer.setRoads(car.getRoads());
+                    //            //if(answer.getRoads() == null || answer.getRoads().size() == 0){
+                    //            //    answer.getRoads();
+                    //            //}
+                    //            break;
+                    //        }
+                    //    }
+                    //    rebuildState();
+                    //}
+                    for(Answer answer : finalAnswer){
+                        if(answer.getCarId() == car.getId()){
+                            answer.setRoads(car.getRoads());//添加寻完路后的答案
+                            break;
+                        }
+                    }
+                    rebuildState();
+                    /*************************更新答案****************************/
                 }
             }
         }

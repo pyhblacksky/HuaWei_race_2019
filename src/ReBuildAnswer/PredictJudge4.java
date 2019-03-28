@@ -85,9 +85,35 @@ public class PredictJudge4 {
             }
 
             /******************************************************************/
+            //统计道路占有率
+            //ArrayList<Road> overPercent = new ArrayList<>();//加入超过某一占有率的路
+            //for(Road road : roadList){
+            //    if(roadPercent(road) > 0.9){//道路占有率超过90%，加入
+            //        overPercent.add(road);
+            //    }
+            //}
+            //if(overPercent.size() >= 4){
+            //    for(Road road : overPercent){
+            //        forbidRoadIdList.add(road.getId());
+            //    }
+            //    return false;
+            //}
 
+            /******************************************************************/
             //此时寻找满路，看是否可以形成环
             ArrayList<Road> fullRoads = countFullRoad();//获取满的路
+            //for(Road road : fullRoads){
+            //    if(!forbidRoadIdList.contains(road.getId())){
+            //        forbidRoadIdList.add(road.getId());
+            //    }
+            //}
+            //if(Time % 5 == 0){
+            //    if(forbidRoadIdList.size() >= 4){
+            //        return false;
+            //    } else {
+            //        return true;
+            //    }
+            //}
             Set<List<Integer>> loop = FindLoop.findLoop(crossList, fullRoads);//根据满的路找环
             //如果有环，则我认为是失败的，否则，是成功的
             if (loop.size() > 0) {
@@ -108,6 +134,42 @@ public class PredictJudge4 {
             }
         }
         return true;
+    }
+
+    /**
+     * 统计道路占有情况
+     * */
+    private static double roadPercent(Road road){
+        double vol = road.getLength() * road.getLanes();
+        int count = 0;
+        double p1 = 0.0;
+        double p2 = 0.0;
+        if(road.getDirected() == 1){
+            ArrayList<ArrayList<Car>> Matrix = road.getMatrix_E2S();
+            for(ArrayList<Car> lanes : Matrix){
+                for(Car car : lanes){
+                    if(car.getId() != -1){
+                        count++;
+                    }
+                }
+            }
+
+            p1 = count / vol;
+        }
+        count = 0;
+
+        ArrayList<ArrayList<Car>> Matrix = road.getMatrix_S2E();
+        for(ArrayList<Car> lanes : Matrix){
+            for(Car car : lanes){
+                if(car.getId() != -1){
+                    count++;
+                }
+            }
+        }
+
+        p2 = count / vol;
+
+        return Math.max(p1, p2);
     }
 
     /**
